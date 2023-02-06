@@ -8,6 +8,7 @@ Conección  de pantalla lcd e I2C con la placa ESP8266
 Librerias utilizadas para la Visualización
 
 #include <Arduino.h>
+
 #include <LiquidCrystal_I2C.h>
 
 codigo 
