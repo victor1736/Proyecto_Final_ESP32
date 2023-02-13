@@ -1,13 +1,26 @@
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
 #include <stdio.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 // La LCD
   LiquidCrystal_I2C lcd(0x27, 20, 4);
 
+//Constante de el Gpio 12 para la lectura de los sensores de temperatura en modo parasito 
+  #define ONE_WIRE_BUS 12
+  OneWire oneWire(ONE_WIRE_BUS);
+  DallasTemperature sensors(&oneWire); 
+  DeviceAddress sensor1 = { 0x28, 0x4D, 0xE3, 0x79, 0x97, 0x14, 0x3, 0xE9 };
+  DeviceAddress sensor2 = { 0x28, 0x47, 0xCB, 0x79, 0x97, 0x11, 0x3, 0x1F };
+  DeviceAddress sensor3= { 0x28, 0xFF, 0x64, 0x1E, 0x15, 0x14, 0x77, 0xB8 };
+  DeviceAddress sensor4 = { 0x28, 0xFF, 0x64, 0x1E, 0x15, 0xE9, 0x43, 0x77 };
+  DeviceAddress sensor5 = { 0x28, 0xFF, 0x64, 0x1E, 0xF, 0x77, 0x9F, 0xBC };
+
+
 //Constantes de encoder
-  #define encoderCLK 12  //D3
-    #define encoderDT  13  //D4
+  #define encoderCLK 0  //D3
+  #define encoderDT  2  //D4
   #define encoderSW  14 //D5
 
   int Estado = 1; 
@@ -39,15 +52,19 @@ void setup() {
 //Monitor serial 
   Serial.begin(115200);
 
-//Menu
+//Iniciando los sensores de temperatura
+sensors.begin();
 }
 
 
 void loop() {
   
+  
+  
   Estado = Sig_Estado;
   if(Estado == 1)
   {
+  
       int menu;
       String arrayMenu[] = {"Informacion", "Temperatura","Humedad","Ciclo de agua", "Luz Ultravioleta"};
       int size = sizeof(arrayMenu) / sizeof(arrayMenu[0]);
@@ -221,51 +238,66 @@ void loop() {
         Estado = Sig_Estado; 
         if( Estado == 41)
                     {
+                      sensors.requestTemperatures();
+                      Serial.print("Medio Ambiente(*C): ");
+                      Serial.println(sensors.getTempC(sensor1));
                       lcd.clear();
                       lcd.setCursor(0, 0);
                       lcd.print("Medio Ambiente:");
                       lcd.setCursor(0, 1);
-                      lcd.print("lectura");
+                      lcd.print(sensors.getTempC(sensor1));
                       delay(5000);
                       Sig_Estado = 1;
                     }
         if( Estado == 42)
                     {
+                      sensors.requestTemperatures();
+                      Serial.print("Domo (*C): ");
+                      Serial.println(sensors.getTempC(sensor2));
                       lcd.clear();
                       lcd.setCursor(0, 0);
                       lcd.print("Domo:");
                       lcd.setCursor(0, 1);
-                      lcd.print("lectura");
+                      lcd.print(sensors.getTempC(sensor2));
                       delay(5000);
                       Sig_Estado = 1;
                     }
         if( Estado == 43)
                     {
+                      sensors.requestTemperatures();
+                      Serial.print("Tanque Principal (*C): ");
+                      Serial.println(sensors.getTempC(sensor3));
                       lcd.clear();
                       lcd.setCursor(0, 0);
                       lcd.print("Tanque Principal:");
                       lcd.setCursor(0, 1);
-                      lcd.print("lectura");
+                      lcd.print(sensors.getTempC(sensor3));
                       delay(5000);
                       Sig_Estado = 1;
                     }
         if( Estado == 44)
                     {
+                      sensors.requestTemperatures();
+                      Serial.print("Tanque de Reserva(*C): ");
+                      Serial.println(sensors.getTempC(sensor4));
                       lcd.clear();
                       lcd.setCursor(0, 0);
                       lcd.print("Tanque de Reserva:");
                       lcd.setCursor(0, 1);
-                      lcd.print("lectura");
+                      lcd.print(sensors.getTempC(sensor4));
                       delay(5000);
                       Sig_Estado = 1;
                     }
         if( Estado == 45)
                     {
+                      sensors.requestTemperatures();
+                      Serial.print("Plantas (*C): ");
+                      Serial.println(sensors.getTempC(sensor5));
                       lcd.clear();
                       lcd.setCursor(0, 0);
                       lcd.print("Plantas:");
                       lcd.setCursor(0, 1);
-                      lcd.print("lectura");
+                      lcd.print(sensors.getTempC(sensor5));
                       delay(5000);
                       Sig_Estado = 1;
                     }  
@@ -430,6 +462,7 @@ int menuANTIFALLOSLENTO(String *arrayMenu,int size)
 
   while(digitalRead(encoderSW) == 1)
   {
+  
 
   //Lectura del estado actual del encoderCLK
   estadoCLK = digitalRead(encoderCLK);
@@ -438,7 +471,7 @@ int menuANTIFALLOSLENTO(String *arrayMenu,int size)
   //Lectura del estado actual SW
   estadoSW = digitalRead(encoderSW);
   //Convertir la lectura anterior en la actual
-    //logica
+   //logica
       
     if (estado_pasado_clk ==LOW  && estadoCLK == HIGH){
         if (estadoDT == LOW){
