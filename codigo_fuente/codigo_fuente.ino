@@ -8,9 +8,14 @@
   LiquidCrystal_I2C lcd(0x27, 20, 4);
 //Sensor de humedad  
 const int humedad = 36 ;
-int valor_humedad ;
-const int humedad1 = 34 ;
-int valor_humedad1 ;
+int valor_humedad = 0;
+const int humedad1 = 39 ;
+int valor_humedad1 = 0 ;
+
+//Fotoresistencia
+const int fotoresistencia = 34 ;
+int valor_fotoresistencia = 0 ;
+
 //Constante de el Gpio 12 para la lectura de los sensores de temperatura en modo parasito 
   #define ONE_WIRE_BUS 17
   OneWire oneWire(ONE_WIRE_BUS);
@@ -329,7 +334,7 @@ void loop() {
                     {
                       valor_humedad = analogRead(humedad);
                       Serial.print(valor_humedad);
-                      valor_humedad = map(valor_humedad, 4095, 1800, 0, 100);
+                      valor_humedad =map(valor_humedad, 4095 , 1300, 0, 100);
                       Serial.print("planta 1: ");
                       Serial.println(valor_humedad);
                       lcd.clear();
@@ -345,7 +350,7 @@ void loop() {
                     {
                       valor_humedad1 = analogRead(humedad1);
                       Serial.print(valor_humedad1);
-                      valor_humedad1 = map(valor_humedad1, 4095 , 1800, 0, 100);
+                      valor_humedad1 = map(valor_humedad1, 4095 , 1300, 0, 100);
                       Serial.print("planta 2: ");
                       Serial.println(valor_humedad1);
                       lcd.clear();
@@ -409,7 +414,7 @@ void loop() {
 
       else if( Estado == 6){
         int menu;
-        String arrayMenu[] = {"Tiempo de Encendido", "Tiempo de apagado", "Cerrar"};
+        String arrayMenu[] = {"Lectura","Tiempo de Encendido", "Tiempo de apagado", "Cerrar"};
         int size = sizeof(arrayMenu) / sizeof(arrayMenu[0]);
         menu = menuANTIFALLOSLENTO(arrayMenu,size);
 
@@ -417,8 +422,22 @@ void loop() {
         else if(menu == 1)Sig_Estado = 71;
         else if(menu == 2)Sig_Estado = 72;
         else if(menu == 3)Sig_Estado = 73;
+        else if(menu == 4)Sig_Estado = 74;
         Estado = Sig_Estado;
         if( Estado == 71)
+                    {
+                      valor_fotoresistencia = analogRead(fotoresistencia);
+                      Serial.println(valor_fotoresistencia);
+                      valor_fotoresistencia =map(valor_fotoresistencia, 4095 , 0, 0, 100);
+                      lcd.clear();
+                      lcd.setCursor(0, 0);
+                      lcd.print("Lectura:");
+                      lcd.setCursor(0, 1);
+                      lcd.print(valor_fotoresistencia);
+                      delay(5000);
+                      Sig_Estado = 1;
+                    }
+        if( Estado == 72)
                     {
                       lcd.clear();
                       lcd.setCursor(0, 0);
@@ -428,7 +447,7 @@ void loop() {
                       delay(5000);
                       Sig_Estado = 1;
                     } 
-        if( Estado == 72)
+        if( Estado == 73)
                     {
                       lcd.clear();
                       lcd.setCursor(0, 0);
@@ -438,7 +457,7 @@ void loop() {
                       delay(5000);
                       Sig_Estado = 1;
                     } 
-        if( Estado ==73)
+        if( Estado ==74)
             {
               lcd.clear();
               lcd.print("Saliendo...");
