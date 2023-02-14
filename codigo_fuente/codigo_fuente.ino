@@ -7,14 +7,20 @@
 // La LCD
   LiquidCrystal_I2C lcd(0x27, 20, 4);
 //Sensor de humedad  
-const int humedad = 36 ;
-int valor_humedad = 0;
-const int humedad1 = 39 ;
-int valor_humedad1 = 0 ;
+  const int humedad = 36 ;
+  int valor_humedad = 0;
+  const int humedad1 = 39 ;
+  int valor_humedad1 = 0 ;
 
 //Fotoresistencia
-const int fotoresistencia = 34 ;
-int valor_fotoresistencia = 0 ;
+  const int fotoresistencia = 34 ;
+  int valor_fotoresistencia = 0 ;
+
+//Medición nivel del tanque de reserva 
+  const int PinTrig = 16;
+  const int PinEcho = 4;
+  int distancia = 0;
+
 
 //Constante de el Gpio 12 para la lectura de los sensores de temperatura en modo parasito 
   #define ONE_WIRE_BUS 17
@@ -63,6 +69,11 @@ void setup() {
 
 //Iniciando los sensores de temperatura
 sensors.begin();
+
+//Pines de nivel de agua
+  pinMode(PinTrig, OUTPUT);
+  pinMode(PinEcho, INPUT);
+  digitalWrite(PinTrig, LOW);//Inicializamos el pin con 0
 }
 
 
@@ -75,7 +86,7 @@ void loop() {
   {
   
       int menu;
-      String arrayMenu[] = {"Informacion", "Temperatura","Humedad","Ciclo de agua", "Luz Ultravioleta"};
+      String arrayMenu[] = {"Informacion", "Temperatura","Humedad","Ciclo de agua", "Luz Ultravioleta", "Nivel de Agua"};
       int size = sizeof(arrayMenu) / sizeof(arrayMenu[0]);
       
       menu = menuANTIFALLOSLENTO(arrayMenu,size); // no hace falta poner el numero 6, se calcula automaticamente. Solo debes de cambiar arrayMenu
@@ -86,6 +97,7 @@ void loop() {
       else if(menu == 3)Sig_Estado = 4;
       else if(menu == 4)Sig_Estado = 5;
       else if(menu == 5)Sig_Estado = 6;
+      else if(menu == 6)Sig_Estado = 7;
 
       }
         else if( Estado == 2){
@@ -466,6 +478,18 @@ void loop() {
             }
         Estado = Sig_Estado;
       }
+      else if( Estado == 7){
+            
+            distancia = 0.01723 * ultrasonido(PinTrig, PinEcho);
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("medida: "+ String (distancia) + "Cm");
+            delay(5000);
+            Sig_Estado = 1;
+
+
+      }
+        
   
 
 
@@ -561,4 +585,15 @@ int menuANTIFALLOSLENTO(String *arrayMenu,int size)
 
   return opcion;
   
+}
+
+long ultrasonido (int triggerPin, int echoPin){
+  pinMode(triggerPin, OUTPUT);
+  digitalWrite(triggerPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(triggerPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(triggerPin, LOW);
+  pinMode(echoPin, INPUT);
+  return pulseIn(echoPin, HIGH);
 }
