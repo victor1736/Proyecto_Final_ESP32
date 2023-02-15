@@ -121,7 +121,11 @@ TaskHandle_t task1;
   DeviceAddress sensor3= { 0x28, 0xFF, 0x64, 0x1E, 0x15, 0x14, 0x77, 0xB8 };
   DeviceAddress sensor4 = { 0x28, 0xFF, 0x64, 0x1E, 0x15, 0xE9, 0x43, 0x77 };
   DeviceAddress sensor5 = { 0x28, 0xFF, 0x64, 0x1E, 0xF, 0x77, 0x9F, 0xBC };
-
+  float Sensor_medio_ambiente ;
+  float Sensor_domo ;
+  float Sensor_tanque_princial ;
+  float Sensor_tanque_reserva ;
+  float Sensor_plantas ;
 
 //Constantes de encoder
   #define encoderCLK 19 
@@ -141,6 +145,7 @@ TaskHandle_t task1;
 //parte operativa
   const int motobomba =  13;
   const int recirculacion = 12;
+  const int riego = 14;
   unsigned long currentTime=0;
   unsigned long previousTime=0;
   unsigned long recirculacion_on = 5000;
@@ -149,6 +154,13 @@ TaskHandle_t task1;
   bool estado_motobomba = LOW;
   bool estado_recirculacion = LOW;
 
+  //control ambiental del domo 
+      int periodo_control_ambiental = 60000 ;
+      unsigned long tiempo_ahora_control_ambiental= 0;
+  
+  //control de temperatura de los tanques
+      int periodo_control_tanques = 1000 ;
+      unsigned long tiempo_ahora_control_tanques= 0;
 
 void setup() {
   // Iniciar LCD
@@ -168,8 +180,6 @@ void setup() {
 //Monitor serial 
   Serial.begin(115200);
 
-//Iniciando los sensores de temperatura
-sensors.begin();
 
 //Pines de nivel de agua
   pinMode(PinTrig, OUTPUT);
@@ -184,6 +194,13 @@ sensors.begin();
   lcd.createChar (6,H);
   lcd.createChar (7,I);
 
+      //Iniciando los sensores de temperatura
+       sensors.begin();
+       //inicializacion de sensores
+      sensors.requestTemperatures();
+
+
+
 xTaskCreatePinnedToCore(
   actuador, // Function to call
   "task1", // Name for this task, mainly for debug
@@ -194,12 +211,12 @@ xTaskCreatePinnedToCore(
   1 // Core where to run
 );
 
+
   
 }
 
 void loop() {
 
- Serial.println("El nucleo: "+String(xPortGetCoreID()));
   Estado = Sig_Estado;
   if(Estado == 1)
   {
@@ -381,7 +398,7 @@ void loop() {
                       lcd.setCursor(0, 0);
                       lcd.print("Medio Ambiente:");
                       lcd.setCursor(0, 1);
-                      lcd.print(sensors.getTempC(sensor1));
+                      lcd.print(Sensor_medio_ambiente);
                       delay(5000);
                       Sig_Estado = 1;
                     }
@@ -391,7 +408,7 @@ void loop() {
                       lcd.setCursor(0, 0);
                       lcd.print("Domo:");
                       lcd.setCursor(0, 1);
-                      lcd.print(sensors.getTempC(sensor2));
+                      lcd.print(Sensor_domo);
                       delay(5000);
                       Sig_Estado = 1;
                     }
@@ -401,7 +418,7 @@ void loop() {
                       lcd.setCursor(0, 0);
                       lcd.print("Tanque Principal:");
                       lcd.setCursor(0, 1);
-                      lcd.print(sensors.getTempC(sensor3));
+                      lcd.print(Sensor_tanque_princial);
                       delay(5000);
                       Sig_Estado = 1;
                     }
@@ -411,7 +428,7 @@ void loop() {
                       lcd.setCursor(0, 0);
                       lcd.print("Tanque de Reserva:");
                       lcd.setCursor(0, 1);
-                      lcd.print(sensors.getTempC(sensor4));
+                      lcd.print(Sensor_tanque_reserva);
                       delay(5000);
                       Sig_Estado = 1;
                     }
@@ -421,7 +438,7 @@ void loop() {
                       lcd.setCursor(0, 0);
                       lcd.print("Plantas:");
                       lcd.setCursor(0, 1);
-                      lcd.print(sensors.getTempC(sensor5));
+                      lcd.print(Sensor_plantas);
                       delay(5000);
                       Sig_Estado = 1;
                     }  
@@ -492,7 +509,7 @@ void loop() {
                       lcd.setCursor(0, 0);
                       lcd.print("Tiempo de Encendido:");
                       lcd.setCursor(0, 1);
-                      lcd.print("lectura");
+                      lcd.print(recirculacion_on);
                       delay(5000);
                       Sig_Estado = 1;
                     } 
@@ -502,7 +519,7 @@ void loop() {
                       lcd.setCursor(0, 0);
                       lcd.print("Tiempo de apagado:");
                       lcd.setCursor(0, 1);
-                      lcd.print("lectura");
+                      lcd.print(recirculacion_off);
                       delay(5000);
                       Sig_Estado = 1;
                     } 
@@ -530,9 +547,7 @@ void loop() {
         Estado = Sig_Estado;
         if( Estado == 71)
                     {
-                      valor_fotoresistencia = analogRead(fotoresistencia);
-                      Serial.println(valor_fotoresistencia);
-                      valor_fotoresistencia =map(valor_fotoresistencia, 4095 , 0, 0, 100);
+
                       lcd.clear();
                       lcd.setCursor(0, 0);
                       lcd.print("Lectura:");
@@ -673,12 +688,7 @@ int menuANTIFALLOSLENTO(String *arrayMenu,int size)
   unsigned long tiempoCambioIncremento = 0;
   unsigned long tiempoCambioDecremento = 0;
 
-  //inicializacion de sensores
-    sensors.requestTemperatures();
-    valor_humedad = analogRead(humedad);
-    valor_humedad1 = analogRead(humedad1);
-    valor_humedad =map(valor_humedad, 4095 , 1300, 0, 100);
-    valor_humedad1 = map(valor_humedad1, 4095 , 1300, 0, 100);
+
     
 
 
@@ -770,8 +780,25 @@ void actuador(void *parameter) {
 //parte operativa
       pinMode(motobomba, OUTPUT);
       pinMode(recirculacion, OUTPUT);
+      pinMode(riego, OUTPUT);
+      digitalWrite(riego, LOW);
 
       for (;;) { 
+       //inicializacion de sensores
+      sensors.requestTemperatures();
+      valor_humedad = analogRead(humedad);
+      valor_humedad1 = analogRead(humedad1);
+      valor_humedad =map(valor_humedad, 4095 , 1300, 0, 100);
+      valor_humedad1 = map(valor_humedad1, 4095 , 1300, 0, 100);
+      Sensor_medio_ambiente = sensors.getTempC(sensor1);
+      Sensor_domo = sensors.getTempC(sensor2);
+      Sensor_tanque_princial = sensors.getTempC(sensor3);
+      Sensor_tanque_reserva = sensors.getTempC(sensor4);
+      Sensor_plantas = sensors.getTempC(sensor5);
+      valor_fotoresistencia = analogRead(fotoresistencia);
+
+      valor_fotoresistencia =map(valor_fotoresistencia, 4095 , 0, 0, 100);
+       Serial.println(valor_fotoresistencia);     
       //parte operativa
       //recirculacion o alimentacion
       currentTime=millis();
@@ -789,6 +816,36 @@ void actuador(void *parameter) {
         Serial.print(F("motobomba State : "));Serial.println(estado_motobomba);
         Serial.print(F("recirculacion State : "));Serial.println(estado_recirculacion);
       }
+//logica de bajar la temperatura en los tanques
+        if (millis() > tiempo_ahora_control_tanques + periodo_control_tanques){
+          tiempo_ahora_control_tanques = millis();
+          Serial.print (Sensor_tanque_princial);
+        if (Sensor_tanque_princial > 27 ){
+          digitalWrite(motobomba,HIGH);
+          digitalWrite(recirculacion,HIGH);
+          Serial.println (" Se inicia el control de temperatura de los tanques");
+          }else{
+          digitalWrite(motobomba,LOW);
+          digitalWrite(recirculacion,LOW);
+          Serial.println (" Se Finaliza el control de temperatura de los tanques");  
+          }
+      } 
+
+//logica de control ambiental dentro del domo
+      if (millis() > tiempo_ahora_control_ambiental + periodo_control_ambiental){
+          tiempo_ahora_control_ambiental = millis();
+          Serial.print (Sensor_domo);
+        if (Sensor_domo > 30 ){
+          digitalWrite(motobomba,HIGH);
+          digitalWrite(riego,HIGH);
+          Serial.println (" Se inicia el control de temperatura");
+          }else{
+          digitalWrite(motobomba,LOW);
+          digitalWrite(riego,LOW);
+          Serial.println (" Se Finaliza el control de temperatura");  
+          }
+      }
+
   }
   vTaskDelay(10);
 }
