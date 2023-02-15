@@ -4,6 +4,91 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
+//Tanque
+    byte A[8] = {
+    0b10111,
+    0b10111,
+    0b10111,
+    0b10111,
+    0b10111,
+    0b10111,
+    0b10111,
+    0b10111
+  };
+  byte B[8] = {
+    0b11101,
+    0b11101,
+    0b11101,
+    0b11101,
+    0b11101,
+    0b11101,
+    0b11101,
+    0b11101
+  };
+  byte C[8] = {
+    0b11111,
+    0b11111,
+    0b11111,
+    0b11111,
+    0b11111,
+    0b11111,
+    0b11111,
+    0b11111
+  };
+  byte D[8] = {
+    0b10111,
+    0b10111,
+    0b10111,
+    0b10111,
+    0b10111,
+    0b10111,
+    0b10000,
+    0b11111
+  };
+  byte E[8] = {
+    0b11101,
+    0b11101,
+    0b11101,
+    0b11101,
+    0b11101,
+    0b11101,
+    0b00001,
+    0b11111
+  };
+  byte F[8] = {
+    0b11111,
+    0b11111,
+    0b11111,
+    0b11111,
+    0b11111,
+    0b11111,
+    0b00000,
+    0b11111
+  };
+    byte H[8] = {
+    0b10000,
+    0b10000,
+    0b10000,
+    0b10000,
+    0b10000,
+    0b10000,
+    0b10000,
+    0b10000
+  };
+    byte I[8] = {
+    0b00001,
+    0b00001,
+    0b00001,
+    0b00001,
+    0b00001,
+    0b00001,
+    0b00001,
+    0b00001
+  };
+
+  int lleno =  2;
+  int vacio = 15;
+
 // La LCD
   LiquidCrystal_I2C lcd(0x27, 20, 4);
 //Sensor de humedad  
@@ -74,6 +159,15 @@ sensors.begin();
   pinMode(PinTrig, OUTPUT);
   pinMode(PinEcho, INPUT);
   digitalWrite(PinTrig, LOW);//Inicializamos el pin con 0
+  lcd.createChar (0,A);
+  lcd.createChar (1,B);
+  lcd.createChar (2,C);
+  lcd.createChar (3,D);
+  lcd.createChar (4,E);
+  lcd.createChar (5,F);
+  lcd.createChar (6,H);
+  lcd.createChar (7,I);
+
 }
 
 
@@ -479,11 +573,82 @@ void loop() {
         Estado = Sig_Estado;
       }
       else if( Estado == 7){
-            
+           
             distancia = 0.01723 * ultrasonido(PinTrig, PinEcho);
-            lcd.clear();
-            lcd.setCursor(0, 0);
-            lcd.print("medida: "+ String (distancia) + "Cm");
+            Serial.println(distancia);
+            distancia = map(distancia, vacio , lleno, 0, 100);
+            if (distancia < 100 && distancia>90){
+            lcd.clear(); 
+            lcd.setCursor (0,1);
+            lcd.write(byte(0));
+            lcd.write(byte(2));
+            lcd.write(byte(2));
+            lcd.write(byte(2)); 
+            lcd.write(byte(1));
+            lcd.setCursor (0,2);
+            lcd.write(byte(0));
+            lcd.write(byte(2));
+            lcd.write(byte(2));
+            lcd.write(byte(2)); 
+            lcd.write(byte(1));
+            lcd.setCursor (0,3);
+            lcd.write(byte(3));
+            lcd.write(byte(5));
+            lcd.write(byte(5));
+            lcd.write(byte(5)); 
+            lcd.write(byte(4)); 
+            lcd.setCursor(6,1);
+            lcd.print("Nivel:");
+            lcd.setCursor(6,2);
+            lcd.print(distancia);
+            }
+            if (distancia < 90 && distancia>40){
+            lcd.clear(); 
+            lcd.setCursor (0,1);
+            lcd.write(byte(6)); 
+            lcd.setCursor (4,1);
+            lcd.write(byte(7));
+            lcd.setCursor (0,2);
+            lcd.write(byte(0));
+            lcd.write(byte(2));
+            lcd.write(byte(2));
+            lcd.write(byte(2)); 
+            lcd.write(byte(1));
+            lcd.setCursor (0,3);
+            lcd.write(byte(3));
+            lcd.write(byte(5));
+            lcd.write(byte(5));
+            lcd.write(byte(5)); 
+            lcd.write(byte(4));
+            lcd.setCursor(6,1);
+            lcd.print("Nivel:");
+            lcd.setCursor(6,2);
+            lcd.print(distancia);
+            
+            }
+            if (distancia < 40){
+            lcd.clear(); 
+            lcd.setCursor (0,1);
+            lcd.write(byte(6)); 
+            lcd.setCursor (4,1);
+            lcd.write(byte(7));
+            lcd.setCursor (0,2);
+            lcd.write(byte(6)); 
+            lcd.setCursor (4,2);
+            lcd.write(byte(7));
+            lcd.setCursor (0,3);
+            lcd.write(byte(3));
+            lcd.write(byte(5));
+            lcd.write(byte(5));
+            lcd.write(byte(5)); 
+            lcd.write(byte(4)); 
+            lcd.setCursor(6,1);
+            lcd.print("Nivel:");
+            lcd.setCursor(6,2);
+            lcd.print(distancia);
+            }
+            
+
             delay(5000);
             Sig_Estado = 1;
 
