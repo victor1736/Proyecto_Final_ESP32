@@ -1,8 +1,13 @@
+
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
 #include <stdio.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+
+
+
+TaskHandle_t task1;
 
 //Tanque
     byte A[8] = {
@@ -133,6 +138,17 @@
   int estado_pasado_DT;
   int estado_pasado_SW;
 
+//parte operativa
+  const int motobomba =  13;
+  const int recirculacion = 12;
+  unsigned long currentTime=0;
+  unsigned long previousTime=0;
+  unsigned long recirculacion_on = 5000;
+  unsigned long recirculacion_off = 10000;
+  unsigned long interval ;
+  bool estado_motobomba = LOW;
+  bool estado_recirculacion = LOW;
+
 
 void setup() {
   // Iniciar LCD
@@ -168,13 +184,22 @@ sensors.begin();
   lcd.createChar (6,H);
   lcd.createChar (7,I);
 
+xTaskCreatePinnedToCore(
+  actuador, // Function to call
+  "task1", // Name for this task, mainly for debug
+  10000, // Stack size
+  NULL, // pvParameters to pass to the function
+  1, // Priority 
+  &task1, // Task handler to use
+  1 // Core where to run
+);
+
+  
 }
 
-
 void loop() {
-  
-  
-  
+
+ Serial.println("El nucleo: "+String(xPortGetCoreID()));
   Estado = Sig_Estado;
   if(Estado == 1)
   {
@@ -336,7 +361,6 @@ void loop() {
             }
            Estado = Sig_Estado;
         }
-
         else if( Estado == 3){
         int menu;
         String arrayMenu[] = { "Medio ambiente", "Domo", "Tanque Principal", "Tanque Reserva", "Plantas", "cerrar"};
@@ -353,9 +377,6 @@ void loop() {
         Estado = Sig_Estado; 
         if( Estado == 41)
                     {
-                      sensors.requestTemperatures();
-                      Serial.print("Medio Ambiente(*C): ");
-                      Serial.println(sensors.getTempC(sensor1));
                       lcd.clear();
                       lcd.setCursor(0, 0);
                       lcd.print("Medio Ambiente:");
@@ -366,9 +387,6 @@ void loop() {
                     }
         if( Estado == 42)
                     {
-                      sensors.requestTemperatures();
-                      Serial.print("Domo (*C): ");
-                      Serial.println(sensors.getTempC(sensor2));
                       lcd.clear();
                       lcd.setCursor(0, 0);
                       lcd.print("Domo:");
@@ -379,9 +397,6 @@ void loop() {
                     }
         if( Estado == 43)
                     {
-                      sensors.requestTemperatures();
-                      Serial.print("Tanque Principal (*C): ");
-                      Serial.println(sensors.getTempC(sensor3));
                       lcd.clear();
                       lcd.setCursor(0, 0);
                       lcd.print("Tanque Principal:");
@@ -392,9 +407,6 @@ void loop() {
                     }
         if( Estado == 44)
                     {
-                      sensors.requestTemperatures();
-                      Serial.print("Tanque de Reserva(*C): ");
-                      Serial.println(sensors.getTempC(sensor4));
                       lcd.clear();
                       lcd.setCursor(0, 0);
                       lcd.print("Tanque de Reserva:");
@@ -405,9 +417,6 @@ void loop() {
                     }
         if( Estado == 45)
                     {
-                      sensors.requestTemperatures();
-                      Serial.print("Plantas (*C): ");
-                      Serial.println(sensors.getTempC(sensor5));
                       lcd.clear();
                       lcd.setCursor(0, 0);
                       lcd.print("Plantas:");
@@ -438,27 +447,16 @@ void loop() {
         Estado = Sig_Estado;
         if( Estado == 51)
                     {
-                      valor_humedad = analogRead(humedad);
-                      Serial.print(valor_humedad);
-                      valor_humedad =map(valor_humedad, 4095 , 1300, 0, 100);
-                      Serial.print("planta 1: ");
-                      Serial.println(valor_humedad);
                       lcd.clear();
                       lcd.setCursor(0, 0);
                       lcd.print("Planta 1:");
                       lcd.setCursor(0, 1);
                       lcd.print(valor_humedad);
-                      
                       delay(5000);
                       Sig_Estado = 1;
                     } 
         if( Estado == 52)
                     {
-                      valor_humedad1 = analogRead(humedad1);
-                      Serial.print(valor_humedad1);
-                      valor_humedad1 = map(valor_humedad1, 4095 , 1300, 0, 100);
-                      Serial.print("planta 2: ");
-                      Serial.println(valor_humedad1);
                       lcd.clear();
                       lcd.setCursor(0, 0);
                       lcd.print("Planta 2:");
@@ -647,17 +645,9 @@ void loop() {
             lcd.setCursor(6,2);
             lcd.print(distancia);
             }
-            
-
             delay(5000);
             Sig_Estado = 1;
-
-
       }
-        
-  
-
-
 }
 
 //Encoder
@@ -683,10 +673,19 @@ int menuANTIFALLOSLENTO(String *arrayMenu,int size)
   unsigned long tiempoCambioIncremento = 0;
   unsigned long tiempoCambioDecremento = 0;
 
+  //inicializacion de sensores
+    sensors.requestTemperatures();
+    valor_humedad = analogRead(humedad);
+    valor_humedad1 = analogRead(humedad1);
+    valor_humedad =map(valor_humedad, 4095 , 1300, 0, 100);
+    valor_humedad1 = map(valor_humedad1, 4095 , 1300, 0, 100);
+    
+
+
+
+
   while(digitalRead(encoderSW) == 1)
   {
-  
-
   //Lectura del estado actual del encoderCLK
   estadoCLK = digitalRead(encoderCLK);
   //Lectura del estado actual del DT
@@ -747,7 +746,9 @@ int menuANTIFALLOSLENTO(String *arrayMenu,int size)
     opcion -= incremento;//Corregimos aunque no de tiempo a pintarla, ya que salimos del bucle y cambiamos de estado
   else if(millis() - tiempoCambioDecremento < 300)
     opcion += incremento;
+    
 
+  
   return opcion;
   
 }
@@ -761,4 +762,33 @@ long ultrasonido (int triggerPin, int echoPin){
   digitalWrite(triggerPin, LOW);
   pinMode(echoPin, INPUT);
   return pulseIn(echoPin, HIGH);
+}
+
+//Freedos
+
+void actuador(void *parameter) {
+//parte operativa
+      pinMode(motobomba, OUTPUT);
+      pinMode(recirculacion, OUTPUT);
+
+      for (;;) { 
+      //parte operativa
+      //recirculacion o alimentacion
+      currentTime=millis();
+      if(estado_recirculacion == LOW){
+        interval=recirculacion_off;
+      }else{
+        interval=recirculacion_on;
+      }
+        if((currentTime-previousTime)>interval){
+        previousTime=currentTime;
+        estado_motobomba =! estado_motobomba;
+        estado_recirculacion =! estado_recirculacion;
+        digitalWrite(motobomba,!estado_motobomba);
+        digitalWrite(recirculacion,!estado_recirculacion);
+        Serial.print(F("motobomba State : "));Serial.println(estado_motobomba);
+        Serial.print(F("recirculacion State : "));Serial.println(estado_recirculacion);
+      }
+  }
+  vTaskDelay(10);
 }
