@@ -146,13 +146,18 @@ TaskHandle_t task1;
   const int motobomba =  13;
   const int recirculacion = 12;
   const int riego = 14;
+  const int Luz_ultravioleta = 27;
   unsigned long currentTime=0;
   unsigned long previousTime=0;
+  unsigned long currentTime1=0;
+  unsigned long previousTime1=0;
   unsigned long recirculacion_on = 5000;
   unsigned long recirculacion_off = 10000;
   unsigned long interval ;
+  unsigned long interval1 ;
   bool estado_motobomba = LOW;
   bool estado_recirculacion = LOW;
+  bool estado_luz_ultravioleta = LOW;
 
   //control ambiental del domo 
       int periodo_control_ambiental = 60000 ;
@@ -161,6 +166,11 @@ TaskHandle_t task1;
   //control de temperatura de los tanques
       int periodo_control_tanques = 1000 ;
       unsigned long tiempo_ahora_control_tanques= 0;
+
+  //Control de luz ultravioleta
+       unsigned long periodo_control_luz_ultravioleta = 5000 ;
+      unsigned long tiempo_ahora_control_luz_ultravioleta= 60000;
+
 
 void setup() {
   // Iniciar LCD
@@ -562,7 +572,7 @@ void loop() {
                       lcd.setCursor(0, 0);
                       lcd.print("Tiempo de Encendido:");
                       lcd.setCursor(0, 1);
-                      lcd.print("lectura");
+                      lcd.print(periodo_control_luz_ultravioleta);
                       delay(5000);
                       Sig_Estado = 1;
                     } 
@@ -782,6 +792,8 @@ void actuador(void *parameter) {
       pinMode(recirculacion, OUTPUT);
       pinMode(riego, OUTPUT);
       digitalWrite(riego, LOW);
+      pinMode(Luz_ultravioleta, OUTPUT);
+      digitalWrite(Luz_ultravioleta, LOW);
 
       for (;;) { 
        //inicializacion de sensores
@@ -798,6 +810,7 @@ void actuador(void *parameter) {
       valor_fotoresistencia = analogRead(fotoresistencia);
 
       valor_fotoresistencia =map(valor_fotoresistencia, 4095 , 0, 0, 100);
+
        Serial.println(valor_fotoresistencia);     
       //parte operativa
       //recirculacion o alimentacion
@@ -846,6 +859,23 @@ void actuador(void *parameter) {
           }
       }
 
+   //logica de Luz ultravioleta   
+        if (valor_fotoresistencia < 40){
+              currentTime1=millis();
+              if(estado_luz_ultravioleta == LOW){
+                interval1=tiempo_ahora_control_luz_ultravioleta;
+              }else{
+                interval1=periodo_control_luz_ultravioleta  ;
+              }
+                if((currentTime1-previousTime1)>interval1){
+                previousTime1=currentTime1;
+                estado_luz_ultravioleta =! estado_luz_ultravioleta;
+                digitalWrite(Luz_ultravioleta,!estado_luz_ultravioleta);
+                Serial.print(F("Luz ultravioleta : "));Serial.println(estado_luz_ultravioleta);
+
+              }
+        }
+ 
   }
   vTaskDelay(10);
 }
