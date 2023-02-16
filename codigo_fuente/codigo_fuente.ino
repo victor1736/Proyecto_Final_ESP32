@@ -4,11 +4,26 @@
 #include <stdio.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <WiFi.h>
+#include <PubSubClient.h>
 
+//Inicializar wifi
+WiFiClient esp32Client;
+PubSubClient mqttClient(esp32Client);
+
+const char* ssid     = "DESKTOP-G34CLR6 7356";     // red wifi a la que se quiere conectar
+const char* password = "cronos12345678";// contraseña
+char *server = "3.87.226.41";    //ip del servidor
+int port = 1883;                   // puerto del servidor
+char datos1[100];
+String resultS = "";
+int var = 0;
+
+// Final
 
 
 TaskHandle_t task1;
-
+TaskHandle_t task2;
 //Tanque
     byte A[8] = {
     0b10111,
@@ -221,8 +236,17 @@ xTaskCreatePinnedToCore(
   1 // Core where to run
 );
 
-
-  
+//wifi
+  wifiInit();
+  xTaskCreatePinnedToCore(
+  cliente, // Function to call
+  "task2", // Name for this task, mainly for debug
+  10000, // Stack size
+  NULL, // pvParameters to pass to the function
+  1, // Priority 
+  &task2, // Task handler to use
+  1 // Core where to run
+  );
 }
 
 void loop() {
@@ -784,7 +808,45 @@ long ultrasonido (int triggerPin, int echoPin){
   return pulseIn(echoPin, HIGH);
 }
 
+//wifi
+void wifiInit() { 
+    Serial.print("Conectándose a ");
+    Serial.println(ssid);
+
+    WiFi.begin(ssid, password);
+
+    while (WiFi.status() != WL_CONNECTED) {
+      Serial.print(".");
+        delay(500);  
+    }
+    Serial.println("");
+    Serial.println("Conectado a WiFi");
+    Serial.println("Dirección IP: ");
+    Serial.println(WiFi.localIP());
+  }
+
 //Freedos
+
+//cliente
+void cliente(void *parameter) {
+  mqttClient.setServer(server, port);
+  for (;;) {
+     if (!mqttClient.connected()) {
+    reconnect();
+  }
+  mqttClient.loop();
+  Serial.print("String: ");
+  Serial.println(resultS);
+  // topico de salida para el datos1 
+//  sprintf(datos1,"{ "rt_temperature":%f}", Sensor_medio_ambiente   );
+  mqttClient.publish("salida1", "rt_temperature ", Sensor_medio_ambiente);
+  Serial.println(datos1);
+  delay(5000);
+    
+  }
+  vTaskDelay(10);
+}
+
 
 void actuador(void *parameter) {
 //parte operativa
@@ -811,7 +873,7 @@ void actuador(void *parameter) {
 
       valor_fotoresistencia =map(valor_fotoresistencia, 4095 , 0, 0, 100);
 
-       Serial.println(valor_fotoresistencia);     
+//       Serial.println(valor_fotoresistencia);     
       //parte operativa
       //recirculacion o alimentacion
       currentTime=millis();
@@ -826,36 +888,36 @@ void actuador(void *parameter) {
         estado_recirculacion =! estado_recirculacion;
         digitalWrite(motobomba,!estado_motobomba);
         digitalWrite(recirculacion,!estado_recirculacion);
-        Serial.print(F("motobomba State : "));Serial.println(estado_motobomba);
-        Serial.print(F("recirculacion State : "));Serial.println(estado_recirculacion);
+//        Serial.print(F("motobomba State : "));Serial.println(estado_motobomba);
+//        Serial.print(F("recirculacion State : "));Serial.println(estado_recirculacion);
       }
 //logica de bajar la temperatura en los tanques
         if (millis() > tiempo_ahora_control_tanques + periodo_control_tanques){
           tiempo_ahora_control_tanques = millis();
-          Serial.print (Sensor_tanque_princial);
+//          Serial.print (Sensor_tanque_princial);
         if (Sensor_tanque_princial > 27 ){
           digitalWrite(motobomba,HIGH);
           digitalWrite(recirculacion,HIGH);
-          Serial.println (" Se inicia el control de temperatura de los tanques");
+//          Serial.println (" Se inicia el control de temperatura de los tanques");
           }else{
           digitalWrite(motobomba,LOW);
           digitalWrite(recirculacion,LOW);
-          Serial.println (" Se Finaliza el control de temperatura de los tanques");  
+//          Serial.println (" Se Finaliza el control de temperatura de los tanques");  
           }
       } 
 
 //logica de control ambiental dentro del domo
       if (millis() > tiempo_ahora_control_ambiental + periodo_control_ambiental){
           tiempo_ahora_control_ambiental = millis();
-          Serial.print (Sensor_domo);
+//          Serial.print (Sensor_domo);
         if (Sensor_domo > 30 ){
           digitalWrite(motobomba,HIGH);
           digitalWrite(riego,HIGH);
-          Serial.println (" Se inicia el control de temperatura");
+//          Serial.println (" Se inicia el control de temperatura");
           }else{
           digitalWrite(motobomba,LOW);
           digitalWrite(riego,LOW);
-          Serial.println (" Se Finaliza el control de temperatura");  
+//          Serial.println (" Se Finaliza el control de temperatura");  
           }
       }
 
@@ -871,11 +933,54 @@ void actuador(void *parameter) {
                 previousTime1=currentTime1;
                 estado_luz_ultravioleta =! estado_luz_ultravioleta;
                 digitalWrite(Luz_ultravioleta,!estado_luz_ultravioleta);
-                Serial.print(F("Luz ultravioleta : "));Serial.println(estado_luz_ultravioleta);
+//                Serial.print(F("Luz ultravioleta : "));Serial.println(estado_luz_ultravioleta);
 
               }
         }
  
   }
   vTaskDelay(10);
+}
+
+//cliente
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Mensaje recibido [");
+  Serial.print(topic);
+  Serial.print("] ");
+
+  char payload_string[length + 1];
+  
+  int resultI;
+
+  memcpy(payload_string, payload, length);
+  payload_string[length] = '\0';
+  resultI = atoi(payload_string);
+  
+  var = resultI;
+
+  resultS = "";
+  
+  for (int i=0;i<length;i++) {
+    resultS= resultS + (char)payload[i];
+  }
+  Serial.println();
+}
+
+void reconnect() {
+  while (!mqttClient.connected()) {
+    Serial.print("Intentando conectarse MQTT...");
+
+    if (mqttClient.connect("arduinoClient")) {
+      Serial.println("Conectado");
+
+      mqttClient.subscribe("0");
+
+           
+    } else {
+      Serial.print("Fallo, rc=");
+      Serial.print(mqttClient.state());
+      Serial.println(" intentar de nuevo en 5 segundos");
+      delay(5000); // espera 5 segundos para volver a conectar
+    }
+  }
 }
