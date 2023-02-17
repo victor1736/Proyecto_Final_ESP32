@@ -973,7 +973,7 @@ void reconnect() {
     if (mqttClient.connect("arduinoClient")) {
       Serial.println("Conectado");
 
-      mqttClient.subscribe("0");
+      mqttClient.subscribe("salida1");
 
            
     } else {
