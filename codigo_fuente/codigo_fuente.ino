@@ -4,6 +4,31 @@
 #include <stdio.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <WiFi.h>
+#include <PubSubClient.h>
+
+#define TIME 5000
+#define MSG_BUFFER_SIZE  (300)
+
+
+//Constantes de wifi
+  const char* WIFI_SSID = "DESKTOP-G34CLR6 7356";
+  const char* WIFI_PASSWORD = "cronos12345678";
+
+//Constantes de servidor
+  const char* IP_SERVER = "20.246.97.221";
+  const char* MQTT_USER = "guest";
+  const char* MQTT_PASSWORD = "guest";
+  const char* DATA_TOPIC = "data";
+  String CLIENT_ID = "ESP32Client-" + String(random(0xffff), HEX); 
+
+//Mensaje a rabbit
+  unsigned long lastMsg = 0;
+  char msg[MSG_BUFFER_SIZE]; //Message to send to RabbitMQ
+
+//Initialization WiFi Client and MQTT Client
+  WiFiClient espClient;
+  PubSubClient client(espClient);
 
 
 // Final
@@ -109,8 +134,8 @@ TaskHandle_t task1;
   int valor_fotoresistencia = 0 ;
 
 //Medición nivel del tanque de reserva 
-  const int PinTrig = 16;
-  const int PinEcho = 4;
+  const int PinTrig = 4;
+  const int PinEcho = 16;
   int distancia = 0;
 
 
@@ -799,6 +824,10 @@ void actuador(void *parameter) {
       pinMode(Luz_ultravioleta, OUTPUT);
       digitalWrite(Luz_ultravioleta, LOW);
 
+    setup_wifi();
+    client.setServer(IP_SERVER, 1883);
+    client.setCallback(callback);
+
       for (;;) { 
        //inicializacion de sensores
       sensors.requestTemperatures();
@@ -879,9 +908,82 @@ void actuador(void *parameter) {
 
               }
         }
- 
+
+        //server
+            if (!client.connected()) {
+                reconnect();
+              }
+              client.loop();
+
+              unsigned long now = millis();
+                if (now - lastMsg > TIME) {
+                  lastMsg = now;
+                  
+                
+
+                  //Format message to influx-format
+                  snprintf (msg, MSG_BUFFER_SIZE, "measurements Temperatura_medio_ambiente=%.2f,Temperatura_Domo=%.2f,Temperatura_Tanque_Principal=%.2f,Temperatura_Tanque_de_reserva=%.2f,Temperatura_Plantas=%.2f,Humedad_Planta_1=%d,Humedad_Planta_2=%d,Fotoresistencia=%d", Sensor_medio_ambiente, Sensor_domo, Sensor_tanque_princial,Sensor_tanque_reserva,Sensor_plantas,valor_humedad,valor_humedad1,valor_fotoresistencia);
+                  Serial.print("Publish message: ");
+                  Serial.println(msg);
+
+                  //Publish data to RabbitMQ with Credentials
+                  if (client.connect(CLIENT_ID.c_str(), MQTT_USER, MQTT_PASSWORD)) {
+                    client.publish(DATA_TOPIC, msg);
+                  } 
+                }
+
+///Final de servidor 
   }
   vTaskDelay(10);
 }
 
 
+//Funcion de wifi
+  void setup_wifi() {
+
+  delay(10);
+  // We start by connecting to a WiFi network
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(WIFI_SSID);
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  randomSeed(micros());
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+  }
+
+  void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+
+  }
+
+  void reconnect() {
+  // Loop until we're reconnected
+  while (!client.connected()) {
+    Serial.print("Attempting MQTT connection...");
+    // Attempt to connect
+    if (client.connect(CLIENT_ID.c_str(), MQTT_USER, MQTT_PASSWORD)) {
+      Serial.println("connected");
+      // Once connected, publish an announcement...
+      client.publish(DATA_TOPIC, "hello world");
+      // ... and resubscribe
+      //client.subscribe("inTopic");
+    } else {
+      Serial.print("failed, rc=");
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
+}
