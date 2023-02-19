@@ -905,10 +905,8 @@ void actuador(void *parameter) {
                 estado_luz_ultravioleta =! estado_luz_ultravioleta;
                 digitalWrite(Luz_ultravioleta,!estado_luz_ultravioleta);
 //                Serial.print(F("Luz ultravioleta : "));Serial.println(estado_luz_ultravioleta);
-
               }
         }
-
         //server
             if (!client.connected()) {
                 reconnect();
@@ -918,9 +916,6 @@ void actuador(void *parameter) {
               unsigned long now = millis();
                 if (now - lastMsg > TIME) {
                   lastMsg = now;
-                  
-                
-
                   //Format message to influx-format
                   snprintf (msg, MSG_BUFFER_SIZE, "measurements Temperatura_medio_ambiente=%.2f,Temperatura_Domo=%.2f,Temperatura_Tanque_Principal=%.2f,Temperatura_Tanque_de_reserva=%.2f,Temperatura_Plantas=%.2f,Humedad_Planta_1=%d,Humedad_Planta_2=%d,Fotoresistencia=%d", Sensor_medio_ambiente, Sensor_domo, Sensor_tanque_princial,Sensor_tanque_reserva,Sensor_plantas,valor_humedad,valor_humedad1,valor_fotoresistencia);
                   Serial.print("Publish message: ");
