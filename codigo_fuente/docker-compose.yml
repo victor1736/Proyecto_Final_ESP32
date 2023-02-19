@@ -41,7 +41,14 @@ services:
     build:
       context: .
       dockerfile: services/grafana/dockerfile
-
+    volumes:
+      - ./grafana/influx.yml:/etc/grafana/provisioning/datasources/influx.yml
+      - ./grafana/grafana.yml:/etc/grafana/provisioning/dashboards/grafana.yml
+      - ./grafana/:/var/lib/grafana/dashboards/
+    depends_on:
+      - database
+    env_file:
+      - grafana/setup.env
 
   telegraf:
     container_name: telegraf
