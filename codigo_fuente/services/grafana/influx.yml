@@ -4,11 +4,11 @@ datasources:
   - name: InfluxDB_v2_Flux
     type: influxdb
     access: proxy
-    url: http://influxDB:8086
+    url: http://influxdb:8086
     jsonData:
       version: Flux
       organization: org
       defaultBucket: rabbit
       tlsSkipVerify: true
     secureJsonData:
-      token: token-secret
+      token: token-secreto

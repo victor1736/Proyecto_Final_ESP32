@@ -7,10 +7,10 @@ services:
     ports:
       - "8086:8086"
     env_file:
-      - services/influx/texto
+      - influx/texto
     build:
       context: .
-      dockerfile: services/influx/dockerfile
+      dockerfile: influx/dockerfile
     networks:
       default:
         aliases:
@@ -22,7 +22,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: services/rabbit/dockerfile
+      dockerfile: rabbit/dockerfile
     ports:
       - "1883:1883"
       - "15672:15672"
@@ -40,7 +40,7 @@ services:
       - "3000:3000"
     build:
       context: .
-      dockerfile: services/grafana/dockerfile
+      dockerfile: grafana/dockerfile
     volumes:
       - ./grafana/influx.yml:/etc/grafana/provisioning/datasources/influx.yml
       - ./grafana/grafana.yml:/etc/grafana/provisioning/dashboards/grafana.yml
@@ -56,24 +56,16 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: services/telegraf/dockerfile
+      dockerfile: telegraf/dockerfile
+    volumes:
+      - ./telegraf/rabbit.conf:/etc/telegraf/telegraf.conf
     depends_on:
       - database
       - broker
     links:
       - database
 
-  analytics:
-    container_name: analitica
-    image: analitica_image
-    restart: always
-    build:
-      context: .
-      dockerfile: services/analitica/dockerfile
-    depends_on:
-      - database
-      - broker
-      - telegraf
+
 
 networks:
   default:

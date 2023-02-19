@@ -16,7 +16,7 @@
   const char* WIFI_PASSWORD = "cronos12345678";
 
 //Constantes de servidor
-  const char* IP_SERVER = "20.246.97.221";
+  const char* IP_SERVER = "44.201.101.47";
   const char* MQTT_USER = "guest";
   const char* MQTT_PASSWORD = "guest";
   const char* DATA_TOPIC = "data";
