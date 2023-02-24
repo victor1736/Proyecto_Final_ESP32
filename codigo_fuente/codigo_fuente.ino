@@ -1054,14 +1054,14 @@ void Control_temperaruta_Tanques(void *parameter) {
   for (;;) { 
 
 //          Serial.print (Sensor_tanque_princial);
-        if (Sensor_tanque_princial > 27 ){
-          digitalWrite(motobomba,HIGH);
-          digitalWrite(recirculacion,HIGH);
-//          Serial.println (" Se inicia el control de temperatura de los tanques");
-          }else{
+        if (Sensor_tanque_princial >= 18  && Sensor_tanque_princial <=27 ){
           digitalWrite(motobomba,LOW);
           digitalWrite(recirculacion,LOW);
-//          Serial.println (" Se Finaliza el control de temperatura de los tanques");   
+//          Serial.println (" Se Finaliza el control de temperatura de los tanques");  
+          }else{
+          digitalWrite(motobomba,HIGH);
+          digitalWrite(recirculacion,HIGH);
+//          Serial.println (" Se inicia el control de temperatura de los tanques");            
           }
       delay(1000);
       }
@@ -1071,18 +1071,34 @@ void Control_temperaruta_Tanques(void *parameter) {
 
 void Control_temperaruta_Domo(void *parameter) {
   for (;;) { 
-              //logica de control ambiental dentro del domo
+
+          if (Hora >= 5  && Hora <= 18){
+//                    Temperatura en el dia
 //                        Serial.print (Sensor_domo);
-                      if (Sensor_domo > 30 ){
-                        digitalWrite(motobomba,HIGH);
-                        digitalWrite(riego,HIGH);
-//                        Serial.println (" Se inicia el control de temperatura");
-                        }else{
+                      if (Sensor_domo < 25  && Sensor_domo > 20  ){
                         digitalWrite(motobomba,LOW);
                         digitalWrite(riego,LOW);
-//                        Serial.println (" Se Finaliza el control de temperatura");  
-                        }
-                    
+//                        Serial.println (" Se Finaliza el control de temperatura"); 
+                        }else{
+                        digitalWrite(motobomba,HIGH);
+                        digitalWrite(riego,HIGH);
+//                        Serial.println (" Se inicia el control de temperatura");                          
+ 
+                        }            
+          }else{
+//                    Temperatura en la noche 
+//                       Serial.print (Sensor_domo);
+                      if (Sensor_domo < 20  && Sensor_domo > 15  ){
+                        digitalWrite(motobomba,LOW);
+                        digitalWrite(riego,LOW);
+//                       Serial.println (" Se Finaliza el control de temperatura");  
+                        }else{
+                         digitalWrite(motobomba,HIGH);
+                        digitalWrite(riego,HIGH);
+//                        Serial.println (" Se inicia el control de temperatura");                         
+
+                        }   
+          }     
                     delay(1000);
       }
   vTaskDelay(10);
