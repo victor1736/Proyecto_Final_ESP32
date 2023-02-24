@@ -1,4 +1,4 @@
-
+#include <ESP32Time.h>
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
 #include <stdio.h>
@@ -16,11 +16,15 @@
   const char* WIFI_PASSWORD = "cronos12345678";
 
 //Constantes de servidor
-  const char* IP_SERVER = "44.201.101.47";
+  const char* IP_SERVER = "44.204.192.25";
   const char* MQTT_USER = "guest";
   const char* MQTT_PASSWORD = "guest";
   const char* DATA_TOPIC = "data";
-  String CLIENT_ID = "ESP32Client-" + String(random(0xffff), HEX); 
+  String CLIENT_ID = "ESP32Client-" + String(random(0xffff), HEX);
+
+   String Fecha ;
+   String HORA;
+   long Hora;
 
 //Mensaje a rabbit
   unsigned long lastMsg = 0;
@@ -30,11 +34,24 @@
   WiFiClient espClient;
   PubSubClient client(espClient);
 
+//RTC
+  ESP32Time rtc;
+
+  //Configuracion de servidor NTP
+    const char* ntpServer = "pool.ntp.org";
+    const long gmtOffset_sec = -5*3600;
+    const int daylightOffset_sec = 0;
+
 
 // Final
 
 
 TaskHandle_t task1;
+TaskHandle_t task2;
+TaskHandle_t task3;
+TaskHandle_t task4;
+TaskHandle_t task5;
+TaskHandle_t task6;
 
 //Tanque
     byte A[8] = {
@@ -132,15 +149,16 @@ TaskHandle_t task1;
 //Fotoresistencia
   const int fotoresistencia = 34 ;
   int valor_fotoresistencia = 0 ;
-
+  int tiempodeencendidodeluz = 10000;
+  
 //Medición nivel del tanque de reserva 
   const int PinTrig = 4;
-  const int PinEcho = 16;
+  const int PinEcho = 15;
   int distancia = 0;
 
 
 //Constante de el Gpio 12 para la lectura de los sensores de temperatura en modo parasito 
-  #define ONE_WIRE_BUS 17
+  #define ONE_WIRE_BUS 13
   OneWire oneWire(ONE_WIRE_BUS);
   DallasTemperature sensors(&oneWire); 
   DeviceAddress sensor1 = { 0x28, 0x4D, 0xE3, 0x79, 0x97, 0x14, 0x3, 0xE9 };
@@ -178,28 +196,16 @@ TaskHandle_t task1;
   unsigned long previousTime=0;
   unsigned long currentTime1=0;
   unsigned long previousTime1=0;
-  unsigned long recirculacion_on = 5000;
-  unsigned long recirculacion_off = 10000;
+  unsigned long recirculacion_on = 900000;
+  unsigned long recirculacion_off = 900000;
   unsigned long interval ;
   unsigned long interval1 ;
   bool estado_motobomba = LOW;
   bool estado_recirculacion = LOW;
   bool estado_luz_ultravioleta = LOW;
 
-  //control ambiental del domo 
-      int periodo_control_ambiental = 60000 ;
-      unsigned long tiempo_ahora_control_ambiental= 0;
-  
-  //control de temperatura de los tanques
-      int periodo_control_tanques = 1000 ;
-      unsigned long tiempo_ahora_control_tanques= 0;
-
-  //Control de luz ultravioleta
-       unsigned long periodo_control_luz_ultravioleta = 5000 ;
-      unsigned long tiempo_ahora_control_luz_ultravioleta= 60000;
-
-
 void setup() {
+
   // Iniciar LCD
   lcd.begin(20, 4);
   lcd.init();
@@ -248,6 +254,55 @@ xTaskCreatePinnedToCore(
   1 // Core where to run
 );
 
+xTaskCreatePinnedToCore(
+  LUZ_ULTRAVIOLETA, // Function to call
+  "task2", // Name for this task, mainly for debug
+  10000, // Stack size
+  NULL, // pvParameters to pass to the function
+  2, // Priority 
+  &task2, // Task handler to use
+  1 // Core where to run
+);
+
+xTaskCreatePinnedToCore(
+  SERVIDOR, // Function to call
+  "task3", // Name for this task, mainly for debug
+  10000, // Stack size
+  NULL, // pvParameters to pass to the function
+  1, // Priority 
+  &task3, // Task handler to use
+  1 // Core where to run
+);
+
+xTaskCreatePinnedToCore(
+  Circulacion_intermitente, // Function to call
+  "task4", // Name for this task, mainly for debug
+  10000, // Stack size
+  NULL, // pvParameters to pass to the function
+  2, // Priority 
+  &task4, // Task handler to use
+  1 // Core where to run
+);
+
+xTaskCreatePinnedToCore(
+  Control_temperaruta_Tanques, // Function to call
+  "task5", // Name for this task, mainly for debug
+  10000, // Stack size
+  NULL, // pvParameters to pass to the function
+  2, // Priority 
+  &task5, // Task handler to use
+  1 // Core where to run
+);
+
+xTaskCreatePinnedToCore(
+  Control_temperaruta_Domo, // Function to call
+  "task6", // Name for this task, mainly for debug
+  10000, // Stack size
+  NULL, // pvParameters to pass to the function
+  2, // Priority 
+  &task6, // Task handler to use
+  1 // Core where to run
+);
 
 }
 
@@ -545,7 +600,9 @@ void loop() {
                       lcd.setCursor(0, 0);
                       lcd.print("Tiempo de Encendido:");
                       lcd.setCursor(0, 1);
-                      lcd.print(recirculacion_on);
+                      lcd.print(recirculacion_on/60000);
+                      lcd.setCursor(0, 2);
+                      lcd.print("Minutos");
                       delay(5000);
                       Sig_Estado = 1;
                     } 
@@ -555,7 +612,9 @@ void loop() {
                       lcd.setCursor(0, 0);
                       lcd.print("Tiempo de apagado:");
                       lcd.setCursor(0, 1);
-                      lcd.print(recirculacion_off);
+                      lcd.print(recirculacion_off/60000);
+                      lcd.setCursor(0, 2);
+                      lcd.print("Minutos");
                       delay(5000);
                       Sig_Estado = 1;
                     } 
@@ -598,7 +657,7 @@ void loop() {
                       lcd.setCursor(0, 0);
                       lcd.print("Tiempo de Encendido:");
                       lcd.setCursor(0, 1);
-                      lcd.print(periodo_control_luz_ultravioleta);
+                      lcd.print("De 5 a 23 Horas");
                       delay(5000);
                       Sig_Estado = 1;
                     } 
@@ -608,7 +667,7 @@ void loop() {
                       lcd.setCursor(0, 0);
                       lcd.print("Tiempo de apagado:");
                       lcd.setCursor(0, 1);
-                      lcd.print("lectura");
+                      lcd.print("De 23 a 5 Horas");
                       delay(5000);
                       Sig_Estado = 1;
                     } 
@@ -724,12 +783,6 @@ int menuANTIFALLOSLENTO(String *arrayMenu,int size)
   unsigned long tiempoCambioIncremento = 0;
   unsigned long tiempoCambioDecremento = 0;
 
-
-    
-
-
-
-
   while(digitalRead(encoderSW) == 1)
   {
   //Lectura del estado actual del encoderCLK
@@ -824,11 +877,14 @@ void actuador(void *parameter) {
       pinMode(Luz_ultravioleta, OUTPUT);
       digitalWrite(Luz_ultravioleta, LOW);
 
-    setup_wifi();
-    client.setServer(IP_SERVER, 1883);
-    client.setCallback(callback);
-
       for (;;) { 
+        //RTC 
+        configTime(gmtOffset_sec,daylightOffset_sec,ntpServer);
+        struct tm timeinfo;
+        if (getLocalTime(&timeinfo)){
+          rtc.setTimeStruct(timeinfo);
+        }
+        
        //inicializacion de sensores
       sensors.requestTemperatures();
       valor_humedad = analogRead(humedad);
@@ -841,98 +897,19 @@ void actuador(void *parameter) {
       Sensor_tanque_reserva = sensors.getTempC(sensor4);
       Sensor_plantas = sensors.getTempC(sensor5);
       valor_fotoresistencia = analogRead(fotoresistencia);
-
       valor_fotoresistencia =map(valor_fotoresistencia, 4095 , 0, 0, 100);
+      Fecha = rtc.getTime("%d/%m/%Y %H:%M:%S");
+      HORA = rtc.getTime("%H");
+      Hora = HORA.toInt();
 
 //       Serial.println(valor_fotoresistencia);     
-      //parte operativa
-      //recirculacion o alimentacion
-      currentTime=millis();
-      if(estado_recirculacion == LOW){
-        interval=recirculacion_off;
-      }else{
-        interval=recirculacion_on;
-      }
-        if((currentTime-previousTime)>interval){
-        previousTime=currentTime;
-        estado_motobomba =! estado_motobomba;
-        estado_recirculacion =! estado_recirculacion;
-        digitalWrite(motobomba,!estado_motobomba);
-        digitalWrite(recirculacion,!estado_recirculacion);
-//        Serial.print(F("motobomba State : "));Serial.println(estado_motobomba);
-//        Serial.print(F("recirculacion State : "));Serial.println(estado_recirculacion);
-      }
-//logica de bajar la temperatura en los tanques
-        if (millis() > tiempo_ahora_control_tanques + periodo_control_tanques){
-          tiempo_ahora_control_tanques = millis();
-//          Serial.print (Sensor_tanque_princial);
-        if (Sensor_tanque_princial > 27 ){
-          digitalWrite(motobomba,HIGH);
-          digitalWrite(recirculacion,HIGH);
-//          Serial.println (" Se inicia el control de temperatura de los tanques");
-          }else{
-          digitalWrite(motobomba,LOW);
-          digitalWrite(recirculacion,LOW);
-//          Serial.println (" Se Finaliza el control de temperatura de los tanques");  
-          }
-      } 
 
-//logica de control ambiental dentro del domo
-      if (millis() > tiempo_ahora_control_ambiental + periodo_control_ambiental){
-          tiempo_ahora_control_ambiental = millis();
-//          Serial.print (Sensor_domo);
-        if (Sensor_domo > 30 ){
-          digitalWrite(motobomba,HIGH);
-          digitalWrite(riego,HIGH);
-//          Serial.println (" Se inicia el control de temperatura");
-          }else{
-          digitalWrite(motobomba,LOW);
-          digitalWrite(riego,LOW);
-//          Serial.println (" Se Finaliza el control de temperatura");  
-          }
-      }
-
-   //logica de Luz ultravioleta   
-        if (valor_fotoresistencia < 40){
-              currentTime1=millis();
-              if(estado_luz_ultravioleta == LOW){
-                interval1=tiempo_ahora_control_luz_ultravioleta;
-              }else{
-                interval1=periodo_control_luz_ultravioleta  ;
-              }
-                if((currentTime1-previousTime1)>interval1){
-                previousTime1=currentTime1;
-                estado_luz_ultravioleta =! estado_luz_ultravioleta;
-                digitalWrite(Luz_ultravioleta,!estado_luz_ultravioleta);
-//                Serial.print(F("Luz ultravioleta : "));Serial.println(estado_luz_ultravioleta);
-              }
-        }
-        //server
-            if (!client.connected()) {
-                reconnect();
-              }
-              client.loop();
-
-              unsigned long now = millis();
-                if (now - lastMsg > TIME) {
-                  lastMsg = now;
-                  //Format message to influx-format
-                  snprintf (msg, MSG_BUFFER_SIZE, "measurements Temperatura_medio_ambiente=%.2f,Temperatura_Domo=%.2f,Temperatura_Tanque_Principal=%.2f,Temperatura_Tanque_de_reserva=%.2f,Temperatura_Plantas=%.2f,Humedad_Planta_1=%d,Humedad_Planta_2=%d,Fotoresistencia=%d", Sensor_medio_ambiente, Sensor_domo, Sensor_tanque_princial,Sensor_tanque_reserva,Sensor_plantas,valor_humedad,valor_humedad1,valor_fotoresistencia);
-                  Serial.print("Publish message: ");
-                  Serial.println(msg);
-
-                  //Publish data to RabbitMQ with Credentials
-                  if (client.connect(CLIENT_ID.c_str(), MQTT_USER, MQTT_PASSWORD)) {
-                    client.publish(DATA_TOPIC, msg);
-                  } 
-                }
-
-///Final de servidor 
   }
   vTaskDelay(10);
+
 }
 
-
+///////////////////////////////////////////////////////////////////////////parte de conexion////////////////////////////////////////
 //Funcion de wifi
   void setup_wifi() {
 
@@ -981,4 +958,132 @@ void actuador(void *parameter) {
       delay(5000);
     }
   }
+}
+
+void SERVIDOR(void *parameter) {
+
+    setup_wifi();
+    client.setServer(IP_SERVER, 1883);
+    client.setCallback(callback);
+ {
+    /* data */
+  };
+  
+  for (;;) { 
+ //server
+            if (!client.connected()) {
+                reconnect();
+              }
+              client.loop();
+
+              unsigned long now = millis();
+                if (now - lastMsg > TIME) {
+                  lastMsg = now;
+                  //Format message to influx-format
+                  snprintf (msg, MSG_BUFFER_SIZE, "measurements Temperatura_medio_ambiente=%.2f,Temperatura_Domo=%.2f,Temperatura_Tanque_Principal=%.2f,Temperatura_Tanque_de_reserva=%.2f,Temperatura_Plantas=%.2f,Humedad_Planta_1=%d,Humedad_Planta_2=%d,Fotoresistencia=%d", Sensor_medio_ambiente, Sensor_domo, Sensor_tanque_princial,Sensor_tanque_reserva,Sensor_plantas,valor_humedad,valor_humedad1,valor_fotoresistencia);
+//                  Serial.print("Publish message: ");
+//                  Serial.println(msg);
+
+                  //Publish data to RabbitMQ with Credentials
+                  if (client.connect(CLIENT_ID.c_str(), MQTT_USER, MQTT_PASSWORD)) {
+                    client.publish(DATA_TOPIC, msg);
+                  } 
+                  
+                }
+                delay(10000);
+///Final de servidor 
+      }
+  vTaskDelay(10);
+
+}
+
+///////////////////////////////////////////////////////////////////////////parte de control////////////////////////////////////////
+
+void LUZ_ULTRAVIOLETA(void *parameter) {
+ 
+  for (;;) { 
+         //logica de Luz ultravioleta 
+         if (Hora >= 5  && Hora <= 23){
+            if (valor_fotoresistencia <30){
+            estado_luz_ultravioleta = HIGH;  
+            digitalWrite(Luz_ultravioleta,estado_luz_ultravioleta) ;
+//            Serial.println("Encendio lamparas");
+            }else{
+            estado_luz_ultravioleta = LOW;  
+            digitalWrite(Luz_ultravioleta,estado_luz_ultravioleta) ;
+//            Serial.println("Apago lamparas");
+            }
+         }
+      delay(1000);
+  }
+  vTaskDelay(10);
+
+}
+///////////////////////////////////////////////////////////////////
+void Circulacion_intermitente(void *parameter) {
+
+  for (;;) { 
+          //parte operativa
+      //recirculacion o alimentacion
+            currentTime=millis();
+      if(estado_recirculacion == LOW){
+        interval=recirculacion_off;
+//        Serial.println("apague");
+      }else{
+        interval=recirculacion_on;
+//        Serial.println("Encendi");
+      }
+
+        if((currentTime-previousTime)>interval){
+        previousTime=currentTime;
+        estado_motobomba =! estado_motobomba;
+        estado_recirculacion =! estado_recirculacion;
+        digitalWrite(motobomba,!estado_motobomba);
+        digitalWrite(recirculacion,!estado_recirculacion);
+        Serial.print(F("motobomba State : "));Serial.println(estado_motobomba);
+        Serial.print(F("recirculacion State : "));Serial.println(estado_recirculacion);
+      }
+
+      delay(1000);
+      }
+  vTaskDelay(10);
+}
+/////////////////////////////////////////////////////////////////
+
+void Control_temperaruta_Tanques(void *parameter) {
+  for (;;) { 
+
+//          Serial.print (Sensor_tanque_princial);
+        if (Sensor_tanque_princial > 27 ){
+          digitalWrite(motobomba,HIGH);
+          digitalWrite(recirculacion,HIGH);
+//          Serial.println (" Se inicia el control de temperatura de los tanques");
+          }else{
+          digitalWrite(motobomba,LOW);
+          digitalWrite(recirculacion,LOW);
+//          Serial.println (" Se Finaliza el control de temperatura de los tanques");   
+          }
+      delay(1000);
+      }
+  vTaskDelay(10);
+}
+/////////////////////////////////////////////////////////////////
+
+void Control_temperaruta_Domo(void *parameter) {
+  for (;;) { 
+              //logica de control ambiental dentro del domo
+//                        Serial.print (Sensor_domo);
+                      if (Sensor_domo > 30 ){
+                        digitalWrite(motobomba,HIGH);
+                        digitalWrite(riego,HIGH);
+//                        Serial.println (" Se inicia el control de temperatura");
+                        }else{
+                        digitalWrite(motobomba,LOW);
+                        digitalWrite(riego,LOW);
+//                        Serial.println (" Se Finaliza el control de temperatura");  
+                        }
+                    
+                    delay(1000);
+      }
+  vTaskDelay(10);
 }
