@@ -21,9 +21,9 @@ Este proyecto busca crear un sistema de cultivo hidropónico que permita una ges
 
 ## Paso a Paso
 
-Paso 1: Se ha integrado una pantalla LCD de 20x4 con módulo I2C para la visualización de variables y el menú selectivo del proyecto de cultivo hidropónico, la cual está conectada a los pines D22 (SCL) y D21 (SDA) de la ESP32. Para su control se ha utilizado la librería LiquidCrystal_I2C.h, que permite la fácil comunicación entre la pantalla LCD y la ESP32. De esta manera, se pueden mostrar en tiempo real las variables obtenidas de los sensores y la información del menú selectivo, brindando una interfaz de usuario intuitiva y clara.
+**Paso 1**: Se ha integrado una pantalla LCD de 20x4 con módulo I2C para la visualización de variables y el menú selectivo del proyecto de cultivo hidropónico, la cual está conectada a los pines D22 (SCL) y D21 (SDA) de la ESP32. Para su control se ha utilizado la librería LiquidCrystal_I2C.h, que permite la fácil comunicación entre la pantalla LCD y la ESP32. De esta manera, se pueden mostrar en tiempo real las variables obtenidas de los sensores y la información del menú selectivo, brindando una interfaz de usuario intuitiva y clara.
 
-Paso 2: Para la interacción del usuario con el sistema hidropónico se ha conectado y programado un encoder a la ESP32. Este encoder se ha conectado en los pines D5 (SW), D18 (DT) y D19 (CLK). La finalidad de este componente es permitir al usuario realizar la selección y navegación del menú del proyecto que se visualiza en la pantalla LCD.
+**Paso 2**: Para la interacción del usuario con el sistema hidropónico se ha conectado y programado un encoder a la ESP32. Este encoder se ha conectado en los pines D5 (SW), D18 (DT) y D19 (CLK). La finalidad de este componente es permitir al usuario realizar la selección y navegación del menú del proyecto que se visualiza en la pantalla LCD.
 
 Paso 3: Para el sistema hidropónico se conectan y programan los sensores de temperatura DS18B20 en cascada, también conocido como modo parásito, en la ESP32, utilizando el pin D13. Se utilizan las librerías OneWire.h para la comunicación de los sensores en cascada y DallasTemperature.h para la lectura de los datos de los sensores. Los sensores se asignan de la siguiente forma:
 
