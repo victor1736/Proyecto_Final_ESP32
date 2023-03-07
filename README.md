@@ -7,12 +7,15 @@ Pantalla LCD 20x4 con módulo I2C para proyecto de cultivo hidropónico con ESP3
 
 Este repositorio contiene el código necesario para controlar una pantalla LCD 20x4 con módulo I2C para visualizar variables y un menú selectivo en un proyecto de cultivo hidropónico utilizando un microcontrolador ESP32.
 
-Materiales necesarios
+Materiales necesarios:
 
 -ESP32
+
 -Pantalla LCD 20x4 con módulo I2C
+
 -Cables de conexión
-Conexión
+
+Conexión:
 
 La pantalla LCD debe conectarse a los pines D22 (SCL) y D21 (SDA) del ESP32.
 
