@@ -4,14 +4,22 @@ Este proyecto busca crear un sistema de cultivo hidropónico que permita una ges
 
 ## Materiales utilizados:
 
-ESP32
-Pantalla LCD de 20x4 con módulo I2C
-Encoder
-Sensores de temperatura DS18B20 en cascada
-Sensores de humedad de suelo YL-69
-Módulo fotoresistencia LDR
-Sensor ultrasonido HC-SR04
+-ESP32
 
+-Pantalla LCD de 20x4 con módulo I2C
+
+-Encoder
+
+-Sensores de temperatura DS18B20 en cascada
+
+-Sensores de humedad de suelo YL-69
+
+-Módulo fotoresistencia LDR
+
+-Sensor ultrasonido HC-SR04
+
+
+## Paso a Paso
 
 Paso 1: Se ha integrado una pantalla LCD de 20x4 con módulo I2C para la visualización de variables y el menú selectivo del proyecto de cultivo hidropónico, la cual está conectada a los pines D22 (SCL) y D21 (SDA) de la ESP32. Para su control se ha utilizado la librería LiquidCrystal_I2C.h, que permite la fácil comunicación entre la pantalla LCD y la ESP32. De esta manera, se pueden mostrar en tiempo real las variables obtenidas de los sensores y la información del menú selectivo, brindando una interfaz de usuario intuitiva y clara.
 
