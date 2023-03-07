@@ -1,5 +1,5 @@
-# Proyecto_Final_ESP8266
-Cultivo Hidroponico con ESP8266
+# Proyecto_Final_ESP32
+Cultivo Hidroponico con ESP32
 
 Conección  de pantalla lcd e I2C con la placa ESP8266
 
