@@ -1,8 +1,8 @@
-#Sistema de cultivo hidropónico inteligente
+# Sistema de cultivo hidropónico inteligente
 
 Este proyecto busca crear un sistema de cultivo hidropónico que permita una gestión más eficiente del ambiente de cultivo, asegurando el crecimiento óptimo de las plantas y una mejor utilización de los recursos disponibles.
 
-##Materiales utilizados:
+## Materiales utilizados:
 
 ESP32
 Pantalla LCD de 20x4 con módulo I2C
