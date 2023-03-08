@@ -66,9 +66,15 @@ Estos sensores brindan información importante sobre la temperatura en diferente
 
 La función de estos sensores es medir el nivel de humedad en el suelo de cada planta, permitiendo determinar si la planta está recibiendo la cantidad adecuada de agua y nutrientes. Esto es especialmente útil en un sistema hidropónico, donde el agua se recircula y es necesario monitorear constantemente la calidad de la solución para mantener el crecimiento óptimo de las plantas.
 
+![image](https://user-images.githubusercontent.com/82006043/223745931-f020231f-6dca-4e77-beeb-a9b8babf494f.png)
+
+**Grafica 4**: Diagrama de conexión entre un ESP32 y un sensor de humedad YL-69 para el monitoreo de parámetros en un sistema IoT para un cultivo hidropónico con técnicas de agricultura de precisión. El ESP32 se conecta al sensor de humedad mediante un circuito divisor de voltaje, permitiendo la medición precisa de la humedad del suelo. Esta conexión es esencial para el monitoreo en tiempo real de la humedad del cultivo hidropónico, lo que permite ajustar la frecuencia de riego y evitar la sobre o sub irrigación que pueda afectar el crecimiento de las plantas.
+
 **Paso 3**: Para detectar la cantidad de luz disponible en el ambiente y programar el ciclo de 18 horas de rayos ultravioleta en el cultivo hidropónico, se conecta y programa el módulo fotoresistencia LDR en la ESP32, en el pin D34. La utilización de este sensor permite una medición precisa de la cantidad de luz disponible en el ambiente, lo que permite programar el ciclo de rayos ultravioleta de forma adecuada.
 
 Además, se habilita el RTC de la ESP32 para que la programación del ciclo de rayos ultravioleta sea aún más precisa y eficiente. De esta manera, se asegura que el ciclo de rayos ultravioleta se realice en el momento adecuado, garantizando una óptima calidad en el proceso de cultivo hidropónico.
+
+
 
 **Paso 4**:  Para una medición más eficiente del nivel de agua en el tanque de reserva, se implementa un Sensor Ultrasonido Hc Sr04 en el sistema. La utilización de este sensor permite una medición más precisa del nivel de agua, lo que se traduce en una mejor interpretación de los datos de medición.
 
