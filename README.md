@@ -1,5 +1,8 @@
 <h1 align="center"> Sistema IoT para la monitorización y visualización de parámetros para un cultivo hidropónico con sistema de agricultura de precisión </h1>
 
+   <p align="left">
+   <img src="https://img.shields.io/badge/STATUS-EN%20DESAROLLO-green">
+   </p>
 
 Este proyecto busca crear un sistema de cultivo hidropónico que permita una gestión más eficiente del ambiente de cultivo, asegurando el crecimiento óptimo de las plantas y una mejor utilización de los recursos disponibles.
 
