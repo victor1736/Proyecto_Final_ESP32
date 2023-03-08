@@ -1,4 +1,4 @@
-<h1 align="center"> Sistema de cultivo hidropónico inteligente </h1>
+<h1 align="center"> Sistema IoT para la monitorización y visualización de parámetros para un cultivo hidropónico con sistema de agricultura de precisión </h1>
 
 
 Este proyecto busca crear un sistema de cultivo hidropónico que permita una gestión más eficiente del ambiente de cultivo, asegurando el crecimiento óptimo de las plantas y una mejor utilización de los recursos disponibles.
