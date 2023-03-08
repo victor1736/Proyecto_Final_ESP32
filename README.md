@@ -4,6 +4,10 @@
    <img src="https://img.shields.io/badge/STATUS-EN%20DESAROLLO-green">
    </p>
 
+<h4 align="center">
+:construction: Proyecto en construcción :construction:
+</h4>
+
 Este proyecto busca crear un sistema de cultivo hidropónico que permita una gestión más eficiente del ambiente de cultivo, asegurando el crecimiento óptimo de las plantas y una mejor utilización de los recursos disponibles.
 
 ## Materiales utilizados:
