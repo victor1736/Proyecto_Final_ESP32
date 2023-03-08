@@ -4,9 +4,9 @@
    <img src="https://img.shields.io/badge/STATUS-EN%20DESAROLLO-green">
    </p>
 
-<h4 align="center">
+<h2 align="center">
 :construction: Proyecto en construcción :construction:
-</h4>
+</h2>
 
 Este proyecto busca crear un sistema de cultivo hidropónico que permita una gestión más eficiente del ambiente de cultivo, asegurando el crecimiento óptimo de las plantas y una mejor utilización de los recursos disponibles.
 
@@ -33,7 +33,7 @@ Este proyecto busca crear un sistema de cultivo hidropónico que permita una ges
 
 ![image](https://user-images.githubusercontent.com/82006043/223729252-3f2b266f-6d0b-4777-ab42-2292b50e7985.png)
 
-Grafica 1: Diagrama de conexión entre un ESP32 y una pantalla LCD 20x4 para la visualización de datos en un sistema IoT para el monitoreo de parámetros en un cultivo hidropónico con técnicas de agricultura de precisión. El ESP32 se conecta a la pantalla LCD mediante un bus I2C, permitiendo la transmisión de datos de forma eficiente. Esta conexión es esencial para la visualización de los datos del sistema IoT en tiempo real en el cultivo hidropónico.
+**Grafica 1**: Diagrama de conexión entre un ESP32 y una pantalla LCD 20x4 para la visualización de datos en un sistema IoT para el monitoreo de parámetros en un cultivo hidropónico con técnicas de agricultura de precisión. El ESP32 se conecta a la pantalla LCD mediante un bus I2C, permitiendo la transmisión de datos de forma eficiente. Esta conexión es esencial para la visualización de los datos del sistema IoT en tiempo real en el cultivo hidropónico.
 
 **Paso 2**: Para la interacción del usuario con el sistema hidropónico se ha conectado y programado un encoder a la ESP32. Este encoder se ha conectado en los pines D5 (SW), D18 (DT) y D19 (CLK). La finalidad de este componente es permitir al usuario realizar la selección y navegación del menú del proyecto que se visualiza en la pantalla LCD.
 
