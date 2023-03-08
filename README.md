@@ -37,6 +37,10 @@ Este proyecto busca crear un sistema de cultivo hidropónico que permita una ges
 
 **Paso 2**: Para la interacción del usuario con el sistema hidropónico se ha conectado y programado un encoder a la ESP32. Este encoder se ha conectado en los pines D5 (SW), D18 (DT) y D19 (CLK). La finalidad de este componente es permitir al usuario realizar la selección y navegación del menú del proyecto que se visualiza en la pantalla LCD.
 
+![image](https://user-images.githubusercontent.com/82006043/223732043-cf89f7aa-6c5a-473a-9539-35674963c918.png)
+
+**Grafica 2**: Diagrama de conexión entre un ESP32, una pantalla LCD 20x4 y un encoder para la navegación del menú en un sistema IoT para el monitoreo de parámetros en un cultivo hidropónico con técnicas de agricultura de precisión. El ESP32 se conecta a la pantalla LCD y al encoder mediante un bus I2C, permitiendo la transmisión de datos y la navegación del menú de forma eficiente. Esta conexión es esencial para la visualización y la interacción con los datos del sistema IoT en tiempo real en el cultivo hidropónico.
+
 ## Optimización del monitoreo en el cultivo hidropónico a través de la integración de sensores en el sistema IoT de agricultura de precisión para la recolección de datos en tiempo real
 
 **Paso 1**: Para el sistema hidropónico se conectan y programan los sensores de temperatura DS18B20 en cascada, también conocido como modo parásito, en la ESP32, utilizando el pin D13. Se utilizan las librerías OneWire.h para la comunicación de los sensores en cascada y DallasTemperature.h para la lectura de los datos de los sensores. Los sensores se asignan de la siguiente forma:
