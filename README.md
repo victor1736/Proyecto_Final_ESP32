@@ -74,11 +74,18 @@ La función de estos sensores es medir el nivel de humedad en el suelo de cada p
 
 Además, se habilita el RTC de la ESP32 para que la programación del ciclo de rayos ultravioleta sea aún más precisa y eficiente. De esta manera, se asegura que el ciclo de rayos ultravioleta se realice en el momento adecuado, garantizando una óptima calidad en el proceso de cultivo hidropónico.
 
+![image](https://user-images.githubusercontent.com/82006043/223747102-ede16c01-c07d-4b6e-b144-c62dec27c446.png)
+
+**Grafica 5**: Diagrama de conexión entre un ESP32 y un sensor de luz LDR para el monitoreo de parámetros en un sistema IoT para un cultivo hidropónico con técnicas de agricultura de precisión. El ESP32 se conecta al sensor LDR mediante un circuito divisor de voltaje, permitiendo la medición precisa de la intensidad de la luz. Esta conexión es esencial para completar el ciclo de luz requerido para la fotosíntesis del cultivo hidropónico, lo que permite mantener un ambiente adecuado para el crecimiento de las plantas y maximizar su productividad.
 
 
 **Paso 4**:  Para una medición más eficiente del nivel de agua en el tanque de reserva, se implementa un Sensor Ultrasonido Hc Sr04 en el sistema. La utilización de este sensor permite una medición más precisa del nivel de agua, lo que se traduce en una mejor interpretación de los datos de medición.
 
 En el código, se realizan transformaciones matemáticas para convertir la medición del sensor en valores de porcentaje de agua contenida en el tanque de reserva y en litros de agua disponibles en el sistema. De esta manera, se puede monitorear y visualizar con mayor precisión la cantidad de agua disponible en el sistema, lo que permite un mejor control del proceso de cultivo hidropónico.
+
+![image](https://user-images.githubusercontent.com/82006043/223748270-0134334c-f853-4fa4-8710-7f170d03d11d.png)
+
+**Grafica 6**: Diagrama de conexión entre un ESP32 y un sensor de ultrasonido para el monitoreo de parámetros en un sistema IoT para un cultivo hidropónico con técnicas de agricultura de precisión. El ESP32 se conecta al sensor de ultrasonido mediante pines digitales, permitiendo la medición del nivel de agua en los tanques de riego del cultivo hidropónico. Esta conexión es esencial para garantizar un suministro de agua adecuado para el cultivo y prevenir el bajo nivel de agua que puede afectar el crecimiento de las plantas.
 
 ## Conectividad y comunicación efectiva en el sistema IoT para la monitorización y visualización de parámetros en un cultivo hidropónico con agricultura de precisión
 
