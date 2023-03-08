@@ -31,6 +31,10 @@ Este proyecto busca crear un sistema de cultivo hidropónico que permita una ges
 
 **Paso 1**: Se ha integrado una pantalla LCD de 20x4 con módulo I2C para la visualización de variables y el menú selectivo del proyecto de cultivo hidropónico, la cual está conectada a los pines D22 (SCL) y D21 (SDA) de la ESP32. Para su control se ha utilizado la librería LiquidCrystal_I2C.h, que permite la fácil comunicación entre la pantalla LCD y la ESP32. De esta manera, se pueden mostrar en tiempo real las variables obtenidas de los sensores y la información del menú selectivo, brindando una interfaz de usuario intuitiva y clara.
 
+![image](https://user-images.githubusercontent.com/82006043/223729252-3f2b266f-6d0b-4777-ab42-2292b50e7985.png)
+
+Grafica 1: Diagrama de conexión entre un ESP32 y una pantalla LCD 20x4 para la visualización de datos en un sistema IoT para el monitoreo de parámetros en un cultivo hidropónico con técnicas de agricultura de precisión. El ESP32 se conecta a la pantalla LCD mediante un bus I2C, permitiendo la transmisión de datos de forma eficiente. Esta conexión es esencial para la visualización de los datos del sistema IoT en tiempo real en el cultivo hidropónico.
+
 **Paso 2**: Para la interacción del usuario con el sistema hidropónico se ha conectado y programado un encoder a la ESP32. Este encoder se ha conectado en los pines D5 (SW), D18 (DT) y D19 (CLK). La finalidad de este componente es permitir al usuario realizar la selección y navegación del menú del proyecto que se visualiza en la pantalla LCD.
 
 ## Optimización del monitoreo en el cultivo hidropónico a través de la integración de sensores en el sistema IoT de agricultura de precisión para la recolección de datos en tiempo real
