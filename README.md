@@ -57,6 +57,11 @@ Este proyecto busca crear un sistema de cultivo hidropónico que permita una ges
 
 Estos sensores brindan información importante sobre la temperatura en diferentes partes del sistema hidropónico, lo que permite monitorear y ajustar el ambiente de cultivo para un mejor crecimiento de las plantas. Además, se utilizan en cascada para reducir la cantidad de pines utilizados en la ESP32.
 
+![image](https://user-images.githubusercontent.com/82006043/223744352-b79702a2-007a-4e4c-bd98-e7483fd0bc9b.png)
+
+**Grafica 3**: Diagrama de conexión entre un ESP32 y un sensor de temperatura DS18B20 para el monitoreo de parámetros en un sistema IoT para un cultivo hidropónico con técnicas de agricultura de precisión. El ESP32 se conecta al sensor de temperatura mediante un bus OneWire, permitiendo la transmisión de datos de forma eficiente. Esta conexión es esencial para la medición precisa y en tiempo real de la temperatura en el cultivo hidropónico, lo que permite tomar medidas oportunas para garantizar un ambiente adecuado para el crecimiento de las plantas.
+
+
 **Paso 2**: Se realiza la conexión y programación de los sensores de humedad de suelo YL-69 en la ESP32, asignando los pines GPIO 36 para la planta 1 y GPIO 39 para la planta 2. Estos sensores se instalan en las plantas, donde llega la recirculación de agua del cultivo, siendo el de la planta 2 ubicado en el extremo final del sistema, donde se encuentra el desfogue del tanque principal hacia el tanque de reserva.
 
 La función de estos sensores es medir el nivel de humedad en el suelo de cada planta, permitiendo determinar si la planta está recibiendo la cantidad adecuada de agua y nutrientes. Esto es especialmente útil en un sistema hidropónico, donde el agua se recircula y es necesario monitorear constantemente la calidad de la solución para mantener el crecimiento óptimo de las plantas.
