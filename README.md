@@ -1,4 +1,5 @@
-# Sistema de cultivo hidropónico inteligente
+<h1 align="center"> Sistema de cultivo hidropónico inteligente </h1>
+
 
 Este proyecto busca crear un sistema de cultivo hidropónico que permita una gestión más eficiente del ambiente de cultivo, asegurando el crecimiento óptimo de las plantas y una mejor utilización de los recursos disponibles.
 
