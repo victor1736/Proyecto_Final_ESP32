@@ -33,9 +33,9 @@ Este proyecto busca crear un sistema de cultivo hidropónico que permita una ges
 
 **Paso 2**: Para la interacción del usuario con el sistema hidropónico se ha conectado y programado un encoder a la ESP32. Este encoder se ha conectado en los pines D5 (SW), D18 (DT) y D19 (CLK). La finalidad de este componente es permitir al usuario realizar la selección y navegación del menú del proyecto que se visualiza en la pantalla LCD.
 
+## Optimización del monitoreo en el cultivo hidropónico a través de la integración de sensores en el sistema IoT de agricultura de precisión para la recolección de datos en tiempo real
 
-
-**Paso 3**: Para el sistema hidropónico se conectan y programan los sensores de temperatura DS18B20 en cascada, también conocido como modo parásito, en la ESP32, utilizando el pin D13. Se utilizan las librerías OneWire.h para la comunicación de los sensores en cascada y DallasTemperature.h para la lectura de los datos de los sensores. Los sensores se asignan de la siguiente forma:
+**Paso 1**: Para el sistema hidropónico se conectan y programan los sensores de temperatura DS18B20 en cascada, también conocido como modo parásito, en la ESP32, utilizando el pin D13. Se utilizan las librerías OneWire.h para la comunicación de los sensores en cascada y DallasTemperature.h para la lectura de los datos de los sensores. Los sensores se asignan de la siguiente forma:
 
 -Medio ambiente = { 0x28, 0x4D, 0xE3, 0x79, 0x97, 0x14, 0x03, 0xE9 }
 
@@ -49,15 +49,15 @@ Este proyecto busca crear un sistema de cultivo hidropónico que permita una ges
 
 Estos sensores brindan información importante sobre la temperatura en diferentes partes del sistema hidropónico, lo que permite monitorear y ajustar el ambiente de cultivo para un mejor crecimiento de las plantas. Además, se utilizan en cascada para reducir la cantidad de pines utilizados en la ESP32.
 
-**Paso 4**: Se realiza la conexión y programación de los sensores de humedad de suelo YL-69 en la ESP32, asignando los pines GPIO 36 para la planta 1 y GPIO 39 para la planta 2. Estos sensores se instalan en las plantas, donde llega la recirculación de agua del cultivo, siendo el de la planta 2 ubicado en el extremo final del sistema, donde se encuentra el desfogue del tanque principal hacia el tanque de reserva.
+**Paso 2**: Se realiza la conexión y programación de los sensores de humedad de suelo YL-69 en la ESP32, asignando los pines GPIO 36 para la planta 1 y GPIO 39 para la planta 2. Estos sensores se instalan en las plantas, donde llega la recirculación de agua del cultivo, siendo el de la planta 2 ubicado en el extremo final del sistema, donde se encuentra el desfogue del tanque principal hacia el tanque de reserva.
 
 La función de estos sensores es medir el nivel de humedad en el suelo de cada planta, permitiendo determinar si la planta está recibiendo la cantidad adecuada de agua y nutrientes. Esto es especialmente útil en un sistema hidropónico, donde el agua se recircula y es necesario monitorear constantemente la calidad de la solución para mantener el crecimiento óptimo de las plantas.
 
-**Paso 5**: Para detectar la cantidad de luz disponible en el ambiente y programar el ciclo de 18 horas de rayos ultravioleta en el cultivo hidropónico, se conecta y programa el módulo fotoresistencia LDR en la ESP32, en el pin D34. La utilización de este sensor permite una medición precisa de la cantidad de luz disponible en el ambiente, lo que permite programar el ciclo de rayos ultravioleta de forma adecuada.
+**Paso 3**: Para detectar la cantidad de luz disponible en el ambiente y programar el ciclo de 18 horas de rayos ultravioleta en el cultivo hidropónico, se conecta y programa el módulo fotoresistencia LDR en la ESP32, en el pin D34. La utilización de este sensor permite una medición precisa de la cantidad de luz disponible en el ambiente, lo que permite programar el ciclo de rayos ultravioleta de forma adecuada.
 
 Además, se habilita el RTC de la ESP32 para que la programación del ciclo de rayos ultravioleta sea aún más precisa y eficiente. De esta manera, se asegura que el ciclo de rayos ultravioleta se realice en el momento adecuado, garantizando una óptima calidad en el proceso de cultivo hidropónico.
 
-**Paso 6**:  Para una medición más eficiente del nivel de agua en el tanque de reserva, se implementa un Sensor Ultrasonido Hc Sr04 en el sistema. La utilización de este sensor permite una medición más precisa del nivel de agua, lo que se traduce en una mejor interpretación de los datos de medición.
+**Paso 4**:  Para una medición más eficiente del nivel de agua en el tanque de reserva, se implementa un Sensor Ultrasonido Hc Sr04 en el sistema. La utilización de este sensor permite una medición más precisa del nivel de agua, lo que se traduce en una mejor interpretación de los datos de medición.
 
 En el código, se realizan transformaciones matemáticas para convertir la medición del sensor en valores de porcentaje de agua contenida en el tanque de reserva y en litros de agua disponibles en el sistema. De esta manera, se puede monitorear y visualizar con mayor precisión la cantidad de agua disponible en el sistema, lo que permite un mejor control del proceso de cultivo hidropónico.
 
