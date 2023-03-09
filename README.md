@@ -166,3 +166,13 @@ Además, la humedad relativa en el ambiente de cultivo también aumenta debido a
 **Luz Ultravioleta**: Las lámparas o reflectores construidos con LEDs ultravioleta pueden ser utilizados en el cultivo hidropónico para mejorar el ciclo de rayos ultravioleta, lo que puede contribuir a la fotosíntesis de las plantas. Estas luces se pueden encender a través del pin 14 de la ESP32 y con la ayuda de un módulo LDR, lo que permite un control preciso de la iluminación en el cultivo hidropónico. Además, los LEDs ultravioleta pueden ayudar a mejorar la calidad y cantidad de los productos cultivados en sistemas hidropónicos al proporcionar una fuente de luz adicional para las plantas. Esto puede ser particularmente beneficioso en situaciones en las que la luz natural es limitada o insuficiente para las necesidades de las plantas. En general, las lámparas o reflectores LED ultravioleta pueden ser una herramienta útil para los cultivadores hidropónicos que buscan mejorar la salud y el rendimiento de sus cultivos.
 
 <h1 align="center"> Sistema de Control </h1>
+
+## Recirculacion de nutrientes
+
+Para lograr la circulación intermitente del agua en el sistema hidropónico NFT, se utiliza un sistema de recirculación que se enciende durante un período de 15 minutos y se apaga durante 15 minutos. Este ciclo se repite a lo largo del día para garantizar que las raíces de las plantas reciban una cantidad constante de agua y nutrientes, al mismo tiempo que tienen acceso al oxígeno del aire durante los períodos de reposo.
+
+La circulación intermitente del agua tiene varios beneficios importantes, como proporcionar agua y nutrientes de manera uniforme y constante, permitir que las raíces tengan acceso al oxígeno del aire, y reducir la acumulación de sales y otros materiales no deseados en la solución nutritiva.
+
+En el caso específico de un cultivo de tomates cherry en un sistema hidropónico NFT, se recomienda un tiempo de circulación intermitente del agua de alrededor de 15 a 20 minutos de circulación seguido de 10 a 15 minutos de reposo. Es importante monitorear el crecimiento y la salud de las plantas y ajustar el tiempo de circulación intermitente del agua según sea necesario para optimizar la producción de los cultivos. Durante la etapa de crecimiento vegetativo, las plantas pueden requerir más agua y nutrientes, mientras que durante la etapa de floración y fructificación, pueden necesitar más nutrientes y menos agua para evitar la pudrición de los frutos.
+
+
