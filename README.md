@@ -14,17 +14,54 @@ Este proyecto busca crear un sistema de cultivo hidropónico que permita una ges
 
 -ESP32
 
+![image](https://user-images.githubusercontent.com/82006043/224137550-7fbcaf5a-f3e6-49d3-8c83-b0e8df3526ee.png)
+
+
 -Pantalla LCD de 20x4 con módulo I2C
+
+![image](https://user-images.githubusercontent.com/82006043/224137905-e280cb1d-dde2-4f13-8823-4487c5ef809b.png)
+
 
 -Encoder
 
--Sensores de temperatura DS18B20 en cascada
+![image](https://user-images.githubusercontent.com/82006043/224138072-f73256af-71d2-4f70-bb54-9baa1500afab.png)
+
+
+
+-Sensores de temperatura DS18B20 
+
+![image](https://user-images.githubusercontent.com/82006043/224138320-96548c25-a150-4988-88a8-d03218af654d.png)
+
 
 -Sensores de humedad de suelo YL-69
 
+![image](https://user-images.githubusercontent.com/82006043/224138562-e856dd73-6f99-4141-a6b2-eab34b3b28ba.png)
+
+
 -Módulo fotoresistencia LDR
 
+![image](https://user-images.githubusercontent.com/82006043/224138780-636fce41-d3fb-41d7-9d14-e70cb897b503.png)
+
+
 -Sensor ultrasonido HC-SR04
+
+![image](https://user-images.githubusercontent.com/82006043/224138928-04ed42ac-be92-4cd9-9d88-7f62be471723.png)
+
+
+-Motobomba
+
+![image](https://user-images.githubusercontent.com/82006043/224139037-5d327d1d-70e2-4631-9163-e753cbf29139.png)
+
+
+-Electroválvula 
+
+![image](https://user-images.githubusercontent.com/82006043/224139182-97905cda-888f-4249-a338-40773f57fc9d.png)
+
+
+-Lámparas o reflectores construidos con LEDs ultravioleta
+
+![image](https://user-images.githubusercontent.com/82006043/224139305-7c0ebfb3-284b-4256-94ef-edeabb3d2ba4.png)
+
 
 
 ## Integrando una interfaz interactiva para la visualización de datos en tiempo real en el sistema IoT de monitorización de parámetros para un cultivo hidropónico con técnicas de agricultura de precisión 
@@ -108,20 +145,23 @@ Al mejorar la capacidad de respuesta del cultivo hidropónico, podemos garantiza
 
 **Motobomba**: La motobomba es un dispositivo que está conectado al pin 13 de la placa ESP32. Su función es proporcionar el movimiento y la presión necesarios para recircular los nutrientes y controlar la temperatura dentro del domo de cultivo hidropónico. La técnica de cultivo hidropónico consiste en cultivar plantas sin suelo y utilizando una solución de nutrientes disuelta en agua para proporcionar los nutrientes necesarios. En este sistema, el agua se recircula constantemente para asegurarse de que las raíces de las plantas tengan acceso a los nutrientes y al agua en todo momento. La motobomba es esencial para mantener este proceso de recirculación y para garantizar que la temperatura dentro del domo de cultivo sea la adecuada para el crecimiento saludable de las plantas. Con el uso de la motobomba, se puede asegurar un flujo constante de nutrientes y agua para las plantas, lo que se traduce en un mayor rendimiento y una mejor calidad de los cultivos.
 
-**Electroválvula de recirculación**: La electroválvula de recirculación es un dispositivo que permite el flujo de agua generado por la motobomba desde el tanque de reserva al tanque principal en el sistema de cultivo hidropónico. La función principal de la electroválvula de recirculación es mantener un flujo constante de agua y nutrientes en el tanque principal para asegurar un suministro adecuado a las plantas en crecimiento. Además, este flujo constante de agua también ayuda a oxigenar y mover los nutrientes, lo que es importante para el crecimiento saludable de las plantas.
+**Electroválvula de recirculación**: La electroválvula de recirculación es otro componente importante en los sistemas de cultivo hidropónico, ya que permite que el agua recircule desde el tanque de reserva al principal a través del sistema de tuberías y la motobomba, que genera el flujo de agua necesario. El control del flujo de agua en la electroválvula está a cargo del sistema de tiempo de la ESP32.
 
-En el cultivo hidropónico, el agua con los nutrientes disueltos es recirculada constantemente para proporcionar a las plantas los nutrientes y agua necesarios. La electroválvula de recirculación es responsable de controlar este flujo de agua y asegurar que el tanque principal esté siempre lleno. Al mantener un suministro constante de agua y nutrientes, se puede lograr una mejor calidad y rendimiento en los cultivos hidropónicos.
+El flujo constante de agua en el sistema de cultivo hidropónico es importante para proporcionar nutrientes y oxígeno a las plantas, y para mantener una temperatura constante en el ambiente de cultivo. Además, la recirculación del agua es esencial para evitar el desperdicio y asegurar el uso eficiente de los nutrientes.
 
-Además, la electroválvula de recirculación también es responsable de controlar la oxigenación y el movimiento de los nutrientes en el sistema. Esto se debe a que la corriente de agua generada por la motobomba es esencial para mantener una buena oxigenación y movimiento de los nutrientes en el tanque principal. Un suministro adecuado de oxígeno y nutrientes en el sistema es esencial para el crecimiento saludable de las plantas y para garantizar un rendimiento óptimo en los cultivos hidropónicos.
+La electroválvula de recirculación se activa y desactiva mediante un temporizador o controlador de tiempo, que está conectado al pin 12 de la ESP32. Cuando se activa, permite que el agua fluya desde el tanque de reserva al tanque principal, donde se mezcla con los nutrientes y se oxigena mediante la acción de la motobomba. Luego, el agua se distribuye a través del sistema de tuberías y aspersores para llegar a las raíces de las plantas.
 
-**La electroválvula de riego por nebulización**, que es accionada por un temporizador o controlador de humedad/temperatura, es esencial en los sistemas de cultivo hidropónico para el control de la temperatura y la humedad del ambiente de cultivo. La motobomba es la fuente de suministro de agua que genera el flujo necesario para el riego por nebulización.
+La recirculación constante del agua también ayuda a mantener la temperatura constante en el ambiente de cultivo hidropónico, ya que el agua actúa como un medio de transferencia de calor. El agua caliente se enfría a medida que fluye a través del sistema, y el agua fría se calienta a medida que se mezcla con el ambiente cálido del domo de cultivo. Esto ayuda a mantener una temperatura constante en el ambiente de cultivo, lo que es beneficioso para el crecimiento saludable de las plantas.
 
-En los sistemas de cultivo hidropónico, el control de la temperatura y la humedad es crucial para el crecimiento y desarrollo saludable de las plantas. El domo de cultivo hidropónico puede generar un ambiente húmedo y cálido, lo que puede afectar negativamente el crecimiento de las plantas. Por esta razón, se utilizan sensores de temperatura para monitorear las condiciones del ambiente y garantizar que se mantengan dentro de los rangos óptimos.
+**La electroválvula de riego por nebulización**: es otro componente esencial en los sistemas de cultivo hidropónico que se utiliza para controlar la temperatura y la humedad en el ambiente de cultivo. Esta electroválvula se activa gracias al flujo generado por la motobomba, y su funcionamiento se basa en la ley de equilibrio de la termodinámica.
 
-La técnica de riego por nebulización consiste en pulverizar finas gotas de agua en el aire del ambiente de cultivo, creando una neblina que se dispersa en el ambiente. Cuando las gotas de agua se evaporan en el aire, se absorbe el calor del ambiente, lo que resulta en una disminución de la temperatura. Este efecto se debe a la ley de equilibrio de la termodinámica, que establece que el calor siempre se transfiere desde un cuerpo caliente hacia un cuerpo frío hasta que ambos cuerpos alcanzan la misma temperatura.
+La electroválvula está conectada al pin 14 de la ESP32 y se activa mediante la lectura de los sensores de temperatura en el domo de cultivo hidropónico. Los sensores de temperatura monitorean constantemente la temperatura y la humedad en el ambiente de cultivo, y envían señales a la ESP32 para que controle el flujo de agua a través de la electroválvula de riego por nebulización.
 
-La electroválvula de riego por nebulización se utiliza para controlar el flujo de agua que va a los aspersores de nebulización. Cuando se activa, permite que el agua fluya desde la fuente de suministro hacia los aspersores, donde se convierte en una fina niebla que se dispersa en el ambiente de cultivo. Este proceso ayuda a aumentar la humedad del aire y reduce la temperatura del ambiente, lo que es beneficioso para el crecimiento de las plantas.
+Cuando los sensores detectan que la temperatura en el ambiente de cultivo es alta, la ESP32 activa la electroválvula de riego por nebulización, lo que hace que el agua se pulverice en forma de pequeñas gotas en el ambiente de cultivo. Este proceso ayuda a bajar la temperatura y aumentar la humedad en el ambiente de cultivo, lo que es beneficioso para el crecimiento saludable de las plantas.
 
-En resumen, la electroválvula de riego por nebulización, junto con la motobomba y los sensores de temperatura, es un componente clave en los sistemas de cultivo hidropónico para controlar la temperatura y la humedad del ambiente de cultivo, proporcionando un ambiente óptimo para el crecimiento saludable de las plantas.
+La ley de equilibrio de la termodinámica establece que, cuando dos objetos con diferentes temperaturas se ponen en contacto, la energía se transferirá desde el objeto más caliente al más frío hasta que ambos objetos alcancen una temperatura de equilibrio. En el caso de la electroválvula de riego por nebulización, el agua pulverizada se evapora rápidamente en el ambiente de cultivo, lo que ayuda a bajar la temperatura.
 
+Además, la humedad relativa en el ambiente de cultivo también aumenta debido a la evaporación del agua. Un ambiente con una humedad relativa adecuada es esencial para la absorción de nutrientes por parte de las plantas y para prevenir el crecimiento de bacterias y hongos en el cultivo hidropónico.
+
+**Luz Ultravioleta**: Las lámparas o reflectores construidos con LEDs ultravioleta pueden ser utilizados en el cultivo hidropónico para mejorar el ciclo de rayos ultravioleta, lo que puede contribuir a la fotosíntesis de las plantas. Estas luces se pueden encender a través del pin 14 de la ESP32 y con la ayuda de un módulo LDR, lo que permite un control preciso de la iluminación en el cultivo hidropónico. Además, los LEDs ultravioleta pueden ayudar a mejorar la calidad y cantidad de los productos cultivados en sistemas hidropónicos al proporcionar una fuente de luz adicional para las plantas. Esto puede ser particularmente beneficioso en situaciones en las que la luz natural es limitada o insuficiente para las necesidades de las plantas. En general, las lámparas o reflectores LED ultravioleta pueden ser una herramienta útil para los cultivadores hidropónicos que buscan mejorar la salud y el rendimiento de sus cultivos.
 
