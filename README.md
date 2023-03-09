@@ -104,5 +104,24 @@ La ventaja de usar FreeDOS es que nos permite ejecutar estas tareas sin tener qu
 Al mejorar la capacidad de respuesta del cultivo hidropónico, podemos garantizar un crecimiento óptimo de las plantas y mejorar la rentabilidad del proyecto. La capacidad de realizar múltiples tareas críticas al mismo tiempo nos permite tomar decisiones rápidas y precisas en función de los datos recopilados en tiempo real, lo que a su vez nos permite optimizar el uso de recursos y garantizar el éxito del cultivo.
 
 
-## **Actuadores** 
+## Actuadores
+
+**Motobomba**: La motobomba es un dispositivo que está conectado al pin 13 de la placa ESP32. Su función es proporcionar el movimiento y la presión necesarios para recircular los nutrientes y controlar la temperatura dentro del domo de cultivo hidropónico. La técnica de cultivo hidropónico consiste en cultivar plantas sin suelo y utilizando una solución de nutrientes disuelta en agua para proporcionar los nutrientes necesarios. En este sistema, el agua se recircula constantemente para asegurarse de que las raíces de las plantas tengan acceso a los nutrientes y al agua en todo momento. La motobomba es esencial para mantener este proceso de recirculación y para garantizar que la temperatura dentro del domo de cultivo sea la adecuada para el crecimiento saludable de las plantas. Con el uso de la motobomba, se puede asegurar un flujo constante de nutrientes y agua para las plantas, lo que se traduce en un mayor rendimiento y una mejor calidad de los cultivos.
+
+**Electroválvula de recirculación**: La electroválvula de recirculación es un dispositivo que permite el flujo de agua generado por la motobomba desde el tanque de reserva al tanque principal en el sistema de cultivo hidropónico. La función principal de la electroválvula de recirculación es mantener un flujo constante de agua y nutrientes en el tanque principal para asegurar un suministro adecuado a las plantas en crecimiento. Además, este flujo constante de agua también ayuda a oxigenar y mover los nutrientes, lo que es importante para el crecimiento saludable de las plantas.
+
+En el cultivo hidropónico, el agua con los nutrientes disueltos es recirculada constantemente para proporcionar a las plantas los nutrientes y agua necesarios. La electroválvula de recirculación es responsable de controlar este flujo de agua y asegurar que el tanque principal esté siempre lleno. Al mantener un suministro constante de agua y nutrientes, se puede lograr una mejor calidad y rendimiento en los cultivos hidropónicos.
+
+Además, la electroválvula de recirculación también es responsable de controlar la oxigenación y el movimiento de los nutrientes en el sistema. Esto se debe a que la corriente de agua generada por la motobomba es esencial para mantener una buena oxigenación y movimiento de los nutrientes en el tanque principal. Un suministro adecuado de oxígeno y nutrientes en el sistema es esencial para el crecimiento saludable de las plantas y para garantizar un rendimiento óptimo en los cultivos hidropónicos.
+
+**La electroválvula de riego por nebulización**, que es accionada por un temporizador o controlador de humedad/temperatura, es esencial en los sistemas de cultivo hidropónico para el control de la temperatura y la humedad del ambiente de cultivo. La motobomba es la fuente de suministro de agua que genera el flujo necesario para el riego por nebulización.
+
+En los sistemas de cultivo hidropónico, el control de la temperatura y la humedad es crucial para el crecimiento y desarrollo saludable de las plantas. El domo de cultivo hidropónico puede generar un ambiente húmedo y cálido, lo que puede afectar negativamente el crecimiento de las plantas. Por esta razón, se utilizan sensores de temperatura para monitorear las condiciones del ambiente y garantizar que se mantengan dentro de los rangos óptimos.
+
+La técnica de riego por nebulización consiste en pulverizar finas gotas de agua en el aire del ambiente de cultivo, creando una neblina que se dispersa en el ambiente. Cuando las gotas de agua se evaporan en el aire, se absorbe el calor del ambiente, lo que resulta en una disminución de la temperatura. Este efecto se debe a la ley de equilibrio de la termodinámica, que establece que el calor siempre se transfiere desde un cuerpo caliente hacia un cuerpo frío hasta que ambos cuerpos alcanzan la misma temperatura.
+
+La electroválvula de riego por nebulización se utiliza para controlar el flujo de agua que va a los aspersores de nebulización. Cuando se activa, permite que el agua fluya desde la fuente de suministro hacia los aspersores, donde se convierte en una fina niebla que se dispersa en el ambiente de cultivo. Este proceso ayuda a aumentar la humedad del aire y reduce la temperatura del ambiente, lo que es beneficioso para el crecimiento de las plantas.
+
+En resumen, la electroválvula de riego por nebulización, junto con la motobomba y los sensores de temperatura, es un componente clave en los sistemas de cultivo hidropónico para controlar la temperatura y la humedad del ambiente de cultivo, proporcionando un ambiente óptimo para el crecimiento saludable de las plantas.
+
 
