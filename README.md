@@ -175,4 +175,20 @@ La circulación intermitente del agua tiene varios beneficios importantes, como 
 
 En el caso específico de un cultivo de tomates cherry en un sistema hidropónico NFT, se recomienda un tiempo de circulación intermitente del agua de alrededor de 15 a 20 minutos de circulación seguido de 10 a 15 minutos de reposo. Es importante monitorear el crecimiento y la salud de las plantas y ajustar el tiempo de circulación intermitente del agua según sea necesario para optimizar la producción de los cultivos. Durante la etapa de crecimiento vegetativo, las plantas pueden requerir más agua y nutrientes, mientras que durante la etapa de floración y fructificación, pueden necesitar más nutrientes y menos agua para evitar la pudrición de los frutos.
 
+## Control de temperatura de tanques 
 
+Para mantener la temperatura adecuada del agua que contiene los nutrientes en un cultivo hidropónico, se puede utilizar un sistema de recirculación intermitente del agua. Este sistema se activa automáticamente mediante una motobomba y una electroválvula cuando la temperatura del agua se encuentra fuera del rango de 18 a 27 grados Celsius. Durante el ciclo de recirculación intermitente, el movimiento del agua genera una reducción de temperatura en el cultivo hidropónico, lo que ayuda a mantener un ambiente óptimo para el crecimiento de las plantas.
+
+## Control de temperatura en el domo 
+
+La temperatura ideal para el cultivo de tomates cherry en invernadero puede variar dependiendo de la etapa de crecimiento de la planta. En general, las temperaturas óptimas para el crecimiento y desarrollo de la planta de tomate cherry en invernadero son de 20 a 25°C durante el día y de 15 a 20°C durante la noche.
+
+Es importante mantener una diferencia de temperatura entre el día y la noche para estimular el crecimiento y desarrollo de la planta. Además, las temperaturas demasiado altas o demasiado bajas pueden afectar negativamente el crecimiento de la planta y la calidad de los frutos.
+
+Para mantener las temperaturas dentro del rango óptimo, se utiliza un sistema de nebulización durante el horario de 5 am a 6 pm. Durante este horario, el sistema de nebulización rocía agua fina en el ambiente para enfriar el invernadero y evitar que la temperatura suba por encima de los 25°C. Además, el sistema de nebulización también ayuda a aumentar la humedad relativa del invernadero, lo que puede ser beneficioso para el crecimiento de la planta.
+
+Fuera de este horario, la temperatura del invernadero se mantiene en un rango de 20 a 15°C para evitar que la temperatura baje demasiado durante la noche.
+
+En el caso de un cultivo hidropónico NFT de tomate cherry, la temperatura del agua es un factor crítico para el éxito del cultivo y la salud de la planta. La temperatura ideal del agua para este tipo de cultivo es de alrededor de 20-25°C, y se debe evitar que la temperatura suba por encima de los 30°C para evitar efectos negativos en el crecimiento de la planta y la calidad de los frutos.
+
+Si la temperatura del agua es demasiado alta, se pueden tomar medidas como agregar hielo al agua o usar un enfriador de agua para mantener la temperatura dentro del rango óptimo. Por otro lado, si la temperatura del agua es demasiado baja, se pueden usar calentadores de agua para aumentar la temperatura del agua.
