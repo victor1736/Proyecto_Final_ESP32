@@ -104,5 +104,5 @@ La ventaja de usar FreeDOS es que nos permite ejecutar estas tareas sin tener qu
 Al mejorar la capacidad de respuesta del cultivo hidropónico, podemos garantizar un crecimiento óptimo de las plantas y mejorar la rentabilidad del proyecto. La capacidad de realizar múltiples tareas críticas al mismo tiempo nos permite tomar decisiones rápidas y precisas en función de los datos recopilados en tiempo real, lo que a su vez nos permite optimizar el uso de recursos y garantizar el éxito del cultivo.
 
 
-## Actuadores 
+## **Actuadores** 
 
