@@ -116,7 +116,7 @@ Además, se habilita el RTC de la ESP32 para que la programación del ciclo de r
 **Grafica 5**: Diagrama de conexión entre un ESP32 y un sensor de luz LDR para el monitoreo de parámetros en un sistema IoT para un cultivo hidropónico con técnicas de agricultura de precisión. El ESP32 se conecta al sensor LDR mediante un circuito divisor de voltaje, permitiendo la medición precisa de la intensidad de la luz. Esta conexión es esencial para completar el ciclo de luz requerido para la fotosíntesis del cultivo hidropónico, lo que permite mantener un ambiente adecuado para el crecimiento de las plantas y maximizar su productividad.
 
 
-**Paso 4**:  Para una medición más eficiente del nivel de agua en el tanque de reserva, se implementa un Sensor Ultrasonido Hc Sr04 en el sistema. La utilización de este sensor permite una medición más precisa del nivel de agua, lo que se traduce en una mejor interpretación de los datos de medición.
+**Paso 4**:  Para una medición más eficiente del nivel de agua en el tanque de reserva, se implementa un Sensor Ultrasonido Hc Sr04 en el sistema (Trig = D4, Echo = D15). La utilización de este sensor permite una medición más precisa del nivel de agua, lo que se traduce en una mejor interpretación de los datos de medición.
 
 En el código, se realizan transformaciones matemáticas para convertir la medición del sensor en valores de porcentaje de agua contenida en el tanque de reserva y en litros de agua disponibles en el sistema. De esta manera, se puede monitorear y visualizar con mayor precisión la cantidad de agua disponible en el sistema, lo que permite un mejor control del proceso de cultivo hidropónico.
 
