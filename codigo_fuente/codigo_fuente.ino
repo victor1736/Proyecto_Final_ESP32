@@ -6,22 +6,36 @@
 #include <DallasTemperature.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <HardwareSerial.h>
 
+  char estado_anterior_quectel=0;
+  char estado_actual_quectel=0;
 #define TIME 5000
 #define MSG_BUFFER_SIZE  (300)
+String alerta_mensaje[] = {"Temperatura del domo por fuera del rango\r\n","Temperatura del domo por dentro del rango\r\n","Temperatura del agua fuera de rango\r\n","Temperatura del agua dentro del rango\r\n","Encendido de lamparas\r\n","Apagado de lamparas\r\n","\x1A"};
+// Configuración del puerto serie
+HardwareSerial quectelSerial(2); // Utilizar el puerto serie 2 del ESP32
+#define QUECTEL_BAUDRATE 115200 // Baudrate del módulo Quectel
+  enum {
+  FSM_ESTADO_INICIO=0,
+  FSM_ESTADO_ENVIANDO_AT,
+  FSM_ESTADO_ENVIANDO_ATI,
+  FSM_ESTADO_ENVIANDO_CPIN,
+  FSM_ESTADO_ENVIANDO_CREG,
+  FSM_ESTADO_ENVIANDO_CMGF,
+  FSM_ESTADO_ENVIANDO_CMGS,
+  FSM_ESTADO_MENSAJE_TXT,
+  FSM_ESTADO_ERROR,
+  FSM_ESTADO_MENSAJE_ENVIADO,
+};
 
-
-//Constantes de wifi
-  const char* WIFI_SSID = "DESKTOP-G34CLR6 7356";
-  const char* WIFI_PASSWORD = "cronos12345678";
-
+String texto;
 //Constantes de servidor
-  const char* IP_SERVER = "44.204.192.25";
+  const char* IP_SERVER = "34.203.228.246";
   const char* MQTT_USER = "guest";
   const char* MQTT_PASSWORD = "guest";
   const char* DATA_TOPIC = "data";
   String CLIENT_ID = "ESP32Client-" + String(random(0xffff), HEX);
-
    String Fecha ;
    String HORA;
    long Hora;
@@ -52,6 +66,7 @@ TaskHandle_t task3;
 TaskHandle_t task4;
 TaskHandle_t task5;
 TaskHandle_t task6;
+
 
 //Tanque
     byte A[8] = {
@@ -135,8 +150,7 @@ TaskHandle_t task6;
     0b00001
   };
 
-  int lleno =  2;
-  int vacio = 15;
+
 
 // La LCD
   LiquidCrystal_I2C lcd(0x27, 20, 4);
@@ -155,14 +169,12 @@ TaskHandle_t task6;
   const int PinTrig = 4;
   const int PinEcho = 15;
   int distancia = 0;
-
-
 //Constante de el Gpio 12 para la lectura de los sensores de temperatura en modo parasito 
   #define ONE_WIRE_BUS 13
   OneWire oneWire(ONE_WIRE_BUS);
   DallasTemperature sensors(&oneWire); 
   DeviceAddress sensor1 = { 0x28, 0x4D, 0xE3, 0x79, 0x97, 0x14, 0x3, 0xE9 };
-  DeviceAddress sensor2 = { 0x28, 0x47, 0xCB, 0x79, 0x97, 0x11, 0x3, 0x1F };
+  DeviceAddress sensor2 = { 0x28, 0x26, 0xE3, 0x1,  0x0,  0x0,  0x0, 0x1 };
   DeviceAddress sensor3= { 0x28, 0xFF, 0x64, 0x1E, 0x15, 0x14, 0x77, 0xB8 };
   DeviceAddress sensor4 = { 0x28, 0xFF, 0x64, 0x1E, 0x15, 0xE9, 0x43, 0x77 };
   DeviceAddress sensor5 = { 0x28, 0xFF, 0x64, 0x1E, 0xF, 0x77, 0x9F, 0xBC };
@@ -171,26 +183,17 @@ TaskHandle_t task6;
   float Sensor_tanque_princial ;
   float Sensor_tanque_reserva ;
   float Sensor_plantas ;
-
 //Constantes de encoder
   #define encoderCLK 19 
   #define encoderDT  18  
   #define encoderSW  5 
-
   int Estado = 1; 
   int Sig_Estado = 1;
 
-  int estadoCLK;
-  int estadoDT;
-  int estadoSW;
-  int estado_pasado_clk;
-  int estado_pasado_DT;
-  int estado_pasado_SW;
-
 //parte operativa
-  const int motobomba =  13;
-  const int recirculacion = 12;
-  const int riego = 14;
+  const int motobomba =  12;
+  const int recirculacion = 14;
+  const int riego = 27;
   const int Luz_ultravioleta = 27;
   unsigned long currentTime=0;
   unsigned long previousTime=0;
@@ -222,7 +225,7 @@ void setup() {
 
 //Monitor serial 
   Serial.begin(115200);
-
+  quectelSerial.begin(QUECTEL_BAUDRATE);
 
 //Pines de nivel de agua
   pinMode(PinTrig, OUTPUT);
@@ -241,8 +244,6 @@ void setup() {
        sensors.begin();
        //inicializacion de sensores
       sensors.requestTemperatures();
-
-
 
 xTaskCreatePinnedToCore(
   actuador, // Function to call
@@ -304,10 +305,13 @@ xTaskCreatePinnedToCore(
   1 // Core where to run
 );
 
+
+
+
 }
 
 void loop() {
-
+  String menusaliendo[] = {"LCD 20x4","Saliendo...","Version 1.0.0"};
   Estado = Sig_Estado;
   if(Estado == 1)
   {
@@ -316,7 +320,7 @@ void loop() {
       String arrayMenu[] = {"Informacion", "Temperatura","Humedad","Ciclo de agua", "Luz Ultravioleta", "Nivel de Agua"};
       int size = sizeof(arrayMenu) / sizeof(arrayMenu[0]);
       
-      menu = menuANTIFALLOSLENTO(arrayMenu,size); // no hace falta poner el numero 6, se calcula automaticamente. Solo debes de cambiar arrayMenu
+      menu = menuANTIFALLOSLENTO(arrayMenu,size); 
     
       if(menu == -1)Sig_Estado = 1;
       else if(menu == 1)Sig_Estado = 2;
@@ -356,115 +360,69 @@ void loop() {
                 else if(menu == 8)Sig_Estado = 98;
                 else if(menu == 9)Sig_Estado = 99;
                 else if(menu == 10)Sig_Estado = 100;
-                Estado = Sig_Estado;    
+                Estado = Sig_Estado;  
+                 String materiales[] = {"Modulo:","ESP32","Motobomba:", "Wolf","Sensor Temperatura:","DS18b20","Sensor Humedad:","Higrometro","Fotoresistencia:","Sensor de luz","Modulo Relay:","4 Canales","Botones:","Encoder","Reflector:","Leds Ultravioleta"};
+                 
                     if( Estado == 91)
                     {
-                      lcd.clear();
-                      lcd.print("LCD 20x4");
-                      delay(5000);
+                      menu_print_opciones_uno(menusaliendo,0);
                       Sig_Estado = 1;
                     }
                     if( Estado == 92)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Modulo:");
-                      lcd.setCursor(0, 1);
-                      lcd.print("ESP8266");
-                      delay(5000);
+                      menu_print_opciones(materiales,0, 1);
                       Sig_Estado = 1;
                     }
                     if( Estado == 93)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Motobomba:");
-                      lcd.setCursor(0, 1);
-                      lcd.print("wolf");
-                      delay(5000);
+                      menu_print_opciones(materiales,2, 3);
                       Sig_Estado = 1;
                     }
                     if( Estado == 94)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Sensor Temperatura:");
-                      lcd.setCursor(0, 1);
-                      lcd.print("DS18b20");
-                      delay(5000);
+                      menu_print_opciones(materiales,4, 5);
                       Sig_Estado = 1;
                     }
                     if( Estado == 95)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Sensor Humedad:");
-                      lcd.setCursor(0, 1);
-                      lcd.print("Higrometro");
-                      delay(5000);
+                      menu_print_opciones(materiales,6, 7);
                       Sig_Estado = 1;
                     }
                     if( Estado == 96)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Fotoresistencia:");
-                      lcd.setCursor(0, 1);
-                      lcd.print("Sensor de luz");
-                      delay(5000);
+                      menu_print_opciones(materiales,8, 9);
                       Sig_Estado = 1;
                     }
                     if( Estado == 97)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Modulo Relay:");
-                      lcd.setCursor(0, 1);
-                      lcd.print("4 Canales");
-                      delay(5000);
+                      menu_print_opciones(materiales,10, 11);
                       Sig_Estado = 1;
                     }
                     if( Estado == 98)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Botones:");
-                      lcd.setCursor(0, 1);
-                      lcd.print("Encoder");
-                      delay(5000);
+                      menu_print_opciones(materiales,12, 13);
                       Sig_Estado = 1;
                     }
                     if( Estado == 99)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Reflector:");
-                      lcd.setCursor(0, 1);
-                      lcd.print("Leds Ultravioleta");
-                      delay(5000);
+                      menu_print_opciones(materiales,14, 15);
                       Sig_Estado = 1;
                     }
                     if( Estado == 100)
                     {
-                      lcd.clear();
-                      lcd.print("Saliendo...");
-                      delay(1000);
+                      menu_print_opciones_uno(menusaliendo,1);
                       Sig_Estado = 1; 
                     }
                     Estado = Sig_Estado;
             }
            if( Estado == 32)
             {
-              lcd.clear();
-              lcd.print("Version 1.0.0");
-              delay(5000);
+              menu_print_opciones_uno(menusaliendo,2);
               Sig_Estado = 1;
             }
             if( Estado == 33)
             {
-              lcd.clear();
-              lcd.print("Saliendo...");
-              delay(1000);
+              menu_print_opciones_uno(menusaliendo,1);
               Sig_Estado = 1; 
             }
            Estado = Sig_Estado;
@@ -483,61 +441,40 @@ void loop() {
         else if(menu == 5)Sig_Estado = 45;
         else if(menu == 6)Sig_Estado = 46;
         Estado = Sig_Estado; 
+        String cambio_variable1 = String (Sensor_medio_ambiente);
+        String cambio_variable2 = String (Sensor_domo);
+        String cambio_variable3 = String (Sensor_tanque_princial);
+        String cambio_variable4 = String (Sensor_tanque_reserva);
+        String cambio_variable5 = String (Sensor_plantas);
+        String temperaturas_opciones []={"Medio Ambiente:",cambio_variable1,"Domo:",cambio_variable2,"Tanque Principal:",cambio_variable3,"Tanque de Reserva:",cambio_variable4,"Plantas:",cambio_variable5};
         if( Estado == 41)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Medio Ambiente:");
-                      lcd.setCursor(0, 1);
-                      lcd.print(Sensor_medio_ambiente);
-                      delay(5000);
+                      menu_print_opciones(temperaturas_opciones,0, 1);
                       Sig_Estado = 1;
                     }
         if( Estado == 42)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Domo:");
-                      lcd.setCursor(0, 1);
-                      lcd.print(Sensor_domo);
-                      delay(5000);
+                      menu_print_opciones(temperaturas_opciones,2, 3);
                       Sig_Estado = 1;
                     }
         if( Estado == 43)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Tanque Principal:");
-                      lcd.setCursor(0, 1);
-                      lcd.print(Sensor_tanque_princial);
-                      delay(5000);
+                      menu_print_opciones(temperaturas_opciones,4, 5);
                       Sig_Estado = 1;
                     }
         if( Estado == 44)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Tanque de Reserva:");
-                      lcd.setCursor(0, 1);
-                      lcd.print(Sensor_tanque_reserva);
-                      delay(5000);
+                      menu_print_opciones(temperaturas_opciones,6, 7);
                       Sig_Estado = 1;
                     }
         if( Estado == 45)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Plantas:");
-                      lcd.setCursor(0, 1);
-                      lcd.print(Sensor_plantas);
-                      delay(5000);
+                      menu_print_opciones(temperaturas_opciones,8, 9);
                       Sig_Estado = 1;
                     }  
         if( Estado == 46)
             {
-              lcd.clear();
-              lcd.print("Saliendo...");
-              delay(1000);
+              menu_print_opciones_uno(menusaliendo,1);
               Sig_Estado = 1; 
             }
         Estado = Sig_Estado;                                                          
@@ -553,31 +490,22 @@ void loop() {
         else if(menu == 2)Sig_Estado = 52;
         else if(menu == 3)Sig_Estado = 53;
         Estado = Sig_Estado;
+        String cambio_variable_humedad = String (valor_humedad);
+        String cambio_variable_humedad1 = String (valor_humedad1);
+        String humedad_opciones[]={"Planta 1:",cambio_variable_humedad,"Planta 2:",cambio_variable_humedad1};
         if( Estado == 51)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Planta 1:");
-                      lcd.setCursor(0, 1);
-                      lcd.print(valor_humedad);
-                      delay(5000);
+                      menu_print_opciones(humedad_opciones,0, 1);
                       Sig_Estado = 1;
                     } 
         if( Estado == 52)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Planta 2:");
-                      lcd.setCursor(0, 1);
-                      lcd.print(valor_humedad1);
-                      delay(5000);
+                      menu_print_opciones(humedad_opciones,2, 3);
                       Sig_Estado = 1;
                     } 
         if( Estado ==53)
             {
-              lcd.clear();
-              lcd.print("Saliendo...");
-              delay(1000);
+              menu_print_opciones_uno(menusaliendo,1);
               Sig_Estado = 1; 
             }
         Estado = Sig_Estado;                     
@@ -620,9 +548,7 @@ void loop() {
                     } 
         if( Estado ==63)
             {
-              lcd.clear();
-              lcd.print("Saliendo...");
-              delay(1000);
+              menu_print_opciones_uno(menusaliendo,1);
               Sig_Estado = 1; 
             }
         Estado = Sig_Estado;
@@ -640,48 +566,34 @@ void loop() {
         else if(menu == 3)Sig_Estado = 73;
         else if(menu == 4)Sig_Estado = 74;
         Estado = Sig_Estado;
+        String cambio_variable_ldr = String (valor_fotoresistencia);
+        String ldr_opciones[]={"Lectura:",cambio_variable_ldr,"Tiempo de Encendido:","De 5 a 23 Horas","Tiempo de apagado:", "De 23 a 5 Horas"};
         if( Estado == 71)
                     {
-
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Lectura:");
-                      lcd.setCursor(0, 1);
-                      lcd.print(valor_fotoresistencia);
-                      delay(5000);
+                      menu_print_opciones(ldr_opciones,0, 1);
                       Sig_Estado = 1;
                     }
         if( Estado == 72)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Tiempo de Encendido:");
-                      lcd.setCursor(0, 1);
-                      lcd.print("De 5 a 23 Horas");
-                      delay(5000);
+                      menu_print_opciones(ldr_opciones,2, 3);
                       Sig_Estado = 1;
                     } 
         if( Estado == 73)
                     {
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Tiempo de apagado:");
-                      lcd.setCursor(0, 1);
-                      lcd.print("De 23 a 5 Horas");
-                      delay(5000);
+                      menu_print_opciones(ldr_opciones,4, 5);
                       Sig_Estado = 1;
                     } 
         if( Estado ==74)
             {
-              lcd.clear();
-              lcd.print("Saliendo...");
-              delay(1000);
+              menu_print_opciones_uno(menusaliendo,1);
               Sig_Estado = 1; 
             }
         Estado = Sig_Estado;
       }
       else if( Estado == 7){
-           
+            //medidas del tanque
+            int lleno =  2;
+            int vacio = 15;
             distancia = 0.01723 * ultrasonido(PinTrig, PinEcho);
             Serial.println(distancia);
             distancia = map(distancia, vacio , lleno, 0, 100);
@@ -761,96 +673,86 @@ void loop() {
 }
 
 //Encoder
-int menuANTIFALLOSLENTO(String *arrayMenu,int size)
-{
-//Menu
-  //Vamos a marcar en que tiempo se hizo cualquier cambio y si se hizo un cambio hace muy poco tiempo y se pulso, ese cambio le damos por malo. ok?
-  //Pintamos el cursor y marcamos la primera opcion
+int menuANTIFALLOSLENTO(String *arrayMenu, int size) {
+  //Variables locales
+  int estadoCLK = LOW;
+  int estado_pasado_clk = LOW;
+  int estadoDT = LOW;
+  int estado_pasado_DT = LOW;
+  int estadoSW = LOW;
+  int estado_pasado_SW = LOW;
+  unsigned long tiempoCambioIncremento = 0;
+  unsigned long tiempoCambioDecremento = 0;
+  int extraOpcion = 0;
+  float incremento = 1;
+
+  //Menu
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("> ");
   float opcion = 1;  //del 1 al 1.75 Opcion 1  //Del 2  al 2.75 opcion 2
-  int extraOpcion = 0;
-  float incremento = 1;
 
   //Pinta los 4 primeros del menu como mucho
-  for(int x = 0; x < size && x <= 3 ; x++) // 
-  {
+  for(int x = 0; x < size && x <= 3 ; x++) { 
     lcd.setCursor(1,x);
     lcd.print(arrayMenu[x]);
   }
-   delay(500);
-  unsigned long tiempoCambioIncremento = 0;
-  unsigned long tiempoCambioDecremento = 0;
+  delay(500);
 
-  while(digitalRead(encoderSW) == 1)
-  {
-  //Lectura del estado actual del encoderCLK
-  estadoCLK = digitalRead(encoderCLK);
-  //Lectura del estado actual del DT
-  estadoDT = digitalRead(encoderDT);
-  //Lectura del estado actual SW
-  estadoSW = digitalRead(encoderSW);
-  //Convertir la lectura anterior en la actual
-   //logica
-      
-    if (estado_pasado_clk ==LOW  && estadoCLK == HIGH){
-        if (estadoDT == LOW){
-        if(opcion <size)
-        {
+  while(digitalRead(encoderSW) == HIGH) {
+    //Lectura del estado actual del encoderCLK
+    estadoCLK = digitalRead(encoderCLK);
+    //Lectura del estado actual del DT
+    estadoDT = digitalRead(encoderDT);
+    //Lectura del estado actual SW
+    estadoSW = digitalRead(encoderSW);
+  
+    if (estado_pasado_clk == LOW  && estadoCLK == HIGH){
+      if (estadoDT == LOW){
+        if(opcion < size) {
           opcion += incremento;
           tiempoCambioIncremento = millis();
-          
         }
-
-        } 
-        else {
-        if(opcion>1)
-        {
-          opcion -=incremento;
+      } else {
+        if(opcion > 1) {
+          opcion -= incremento;
           tiempoCambioDecremento = millis();
-          
         }
-          }
+      }
+
       //Si sobrepasamos el limite por debajo
-      if(opcion < 1 + extraOpcion)
-        extraOpcion--;
+      if(opcion < 1 + extraOpcion) extraOpcion--;
       //Si sobrepasamos el limite por encima
-      if(opcion > 4 + extraOpcion)
-        extraOpcion++;
+      if(opcion > 4 + extraOpcion) extraOpcion++;
 
       //Pintamos de nuevo el menu
       lcd.clear();
-      for(int x = extraOpcion; x < size && x <= (3+extraOpcion) ; x++)  
-      {
+      for(int x = extraOpcion; x < size && x <= (3+extraOpcion) ; x++) {  
         lcd.setCursor(1,x - extraOpcion);
         lcd.print(arrayMenu[x]);
       }
       //Pintamos el cursor
       lcd.setCursor(0,opcion-1-extraOpcion);
       lcd.print(">");
-    
-    }
-    
 
-  estado_pasado_clk = estadoCLK;
-  estado_pasado_DT = estadoDT;
-  estado_pasado_SW = estadoSW;
-  yield();
+    }
+
+    estado_pasado_clk = estadoCLK;
+    estado_pasado_DT = estadoDT;
+    estado_pasado_SW = estadoSW;
+    yield();
   }
 
-//Aqui hemos salido del bucle ya que hemos pulsado el boton Enter o ATRAS
-//En cualquier caso no debería haberse movido ninguna tecla en 250ms?
-  if(millis() - tiempoCambioIncremento < 300)
-    opcion -= incremento;//Corregimos aunque no de tiempo a pintarla, ya que salimos del bucle y cambiamos de estado
-  else if(millis() - tiempoCambioDecremento < 300)
+  //Aqui hemos salido del bucle ya que hemos pulsado el boton Enter o ATRAS
+  if(millis() - tiempoCambioIncremento < 300) {
+    opcion -= incremento;
+  } else if(millis() - tiempoCambioDecremento < 300) {
     opcion += incremento;
-    
-
+  }
   
   return opcion;
-  
 }
+
 
 long ultrasonido (int triggerPin, int echoPin){
   pinMode(triggerPin, OUTPUT);
@@ -863,10 +765,7 @@ long ultrasonido (int triggerPin, int echoPin){
   return pulseIn(echoPin, HIGH);
 }
 
-
-
 //Freedos
-
 
 void actuador(void *parameter) {
 //parte operativa
@@ -898,12 +797,11 @@ void actuador(void *parameter) {
       Sensor_plantas = sensors.getTempC(sensor5);
       valor_fotoresistencia = analogRead(fotoresistencia);
       valor_fotoresistencia =map(valor_fotoresistencia, 4095 , 0, 0, 100);
-      Fecha = rtc.getTime("%d/%m/%Y %H:%M:%S");
+      Fecha = rtc.getTime("%Y/%m/%d %H:%M:%S");
       HORA = rtc.getTime("%H");
       Hora = HORA.toInt();
-
-//       Serial.println(valor_fotoresistencia);     
-
+          
+yield();
   }
   vTaskDelay(10);
 
@@ -912,36 +810,27 @@ void actuador(void *parameter) {
 ///////////////////////////////////////////////////////////////////////////parte de conexion////////////////////////////////////////
 //Funcion de wifi
   void setup_wifi() {
-
+  //Constantes de wifi
+  const char* WIFI_SSID = "DESKTOP-G34CLR6 7356";
+  const char* WIFI_PASSWORD = "cronos12345678";
   delay(10);
-  // We start by connecting to a WiFi network
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(WIFI_SSID);
-
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
-
   randomSeed(micros());
-
   Serial.println("");
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
   }
 
-  void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived [");
-
-  }
-
   void reconnect() {
-  // Loop until we're reconnected
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
@@ -959,6 +848,10 @@ void actuador(void *parameter) {
     }
   }
 }
+ void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+
+  }
 
 void SERVIDOR(void *parameter) {
 
@@ -970,7 +863,6 @@ void SERVIDOR(void *parameter) {
   };
   
   for (;;) { 
- //server
             if (!client.connected()) {
                 reconnect();
               }
@@ -979,46 +871,50 @@ void SERVIDOR(void *parameter) {
               unsigned long now = millis();
                 if (now - lastMsg > TIME) {
                   lastMsg = now;
-                  //Format message to influx-format
                   snprintf (msg, MSG_BUFFER_SIZE, "measurements Temperatura_medio_ambiente=%.2f,Temperatura_Domo=%.2f,Temperatura_Tanque_Principal=%.2f,Temperatura_Tanque_de_reserva=%.2f,Temperatura_Plantas=%.2f,Humedad_Planta_1=%d,Humedad_Planta_2=%d,Fotoresistencia=%d", Sensor_medio_ambiente, Sensor_domo, Sensor_tanque_princial,Sensor_tanque_reserva,Sensor_plantas,valor_humedad,valor_humedad1,valor_fotoresistencia);
-//                  Serial.print("Publish message: ");
-//                  Serial.println(msg);
-
-                  //Publish data to RabbitMQ with Credentials
                   if (client.connect(CLIENT_ID.c_str(), MQTT_USER, MQTT_PASSWORD)) {
                     client.publish(DATA_TOPIC, msg);
-                  } 
-                  
+                  }  
                 }
                 delay(10000);
-///Final de servidor 
+                yield();
       }
   vTaskDelay(10);
 
 }
 
 ///////////////////////////////////////////////////////////////////////////parte de control////////////////////////////////////////
-
 void LUZ_ULTRAVIOLETA(void *parameter) {
- 
-  for (;;) { 
-         //logica de Luz ultravioleta 
-         if (Hora >= 5  && Hora <= 23){
-            if (valor_fotoresistencia <30){
-            estado_luz_ultravioleta = HIGH;  
-            digitalWrite(Luz_ultravioleta,estado_luz_ultravioleta) ;
-//            Serial.println("Encendio lamparas");
-            }else{
-            estado_luz_ultravioleta = LOW;  
-            digitalWrite(Luz_ultravioleta,estado_luz_ultravioleta) ;
-//            Serial.println("Apago lamparas");
-            }
-         }
-      delay(1000);
-  }
-  vTaskDelay(10);
+  const int HORA_ENCENDIDO = 5;
+  const int HORA_APAGADO = 23;
 
+  bool estado_anterior = false; // Inicialmente la luz está apagada
+
+  for (;;) {
+      bool estado_actual = (Hora >= HORA_ENCENDIDO && Hora <= HORA_APAGADO && valor_fotoresistencia < 30);
+      if (estado_actual) {
+          digitalWrite(Luz_ultravioleta, HIGH);
+        } else {
+          digitalWrite(Luz_ultravioleta, LOW);
+        }
+
+      if (estado_anterior != estado_actual) {
+          estado_anterior = estado_actual;
+          COMANDOS_AT(alerta_mensaje);
+          Serial.print("Hora: ");
+          Serial.println(Hora);
+          Serial.print("Estado de la luz: ");
+          Serial.println(estado_actual ? "Encendido" : "Apagado");
+          
+      }
+
+    yield();
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+  }
 }
+
+
+
 ///////////////////////////////////////////////////////////////////
 void Circulacion_intermitente(void *parameter) {
 
@@ -1045,61 +941,212 @@ void Circulacion_intermitente(void *parameter) {
       }
 
       delay(1000);
+      yield();
       }
   vTaskDelay(10);
 }
 /////////////////////////////////////////////////////////////////
 
 void Control_temperaruta_Tanques(void *parameter) {
+  bool estado_anterior = false;
   for (;;) { 
-
-//          Serial.print (Sensor_tanque_princial);
-        if (Sensor_tanque_princial >= 18  && Sensor_tanque_princial <=27 ){
-          digitalWrite(motobomba,LOW);
-          digitalWrite(recirculacion,LOW);
-//          Serial.println (" Se Finaliza el control de temperatura de los tanques");  
-          }else{
-          digitalWrite(motobomba,HIGH);
-          digitalWrite(recirculacion,HIGH);
-//          Serial.println (" Se inicia el control de temperatura de los tanques");            
-          }
+    bool estado_actual = (Sensor_tanque_princial >= 18 && Sensor_tanque_princial <= 27);
+          if (estado_actual) {
+            digitalWrite(motobomba, LOW);
+            digitalWrite(recirculacion, LOW);
+        } else {
+            digitalWrite(motobomba, HIGH);
+            digitalWrite(recirculacion, HIGH);
+        }
+          if (estado_anterior != estado_actual) {
+          estado_anterior = estado_actual;
+          COMANDOS_AT(alerta_mensaje);
+          Serial.print("Estado de la contro de temperatura tanques: ");
+          Serial.println(estado_actual ? "dentro de  rango" : "fuera de rango ");
+          
+      }
       delay(1000);
+      yield();
       }
   vTaskDelay(10);
 }
-/////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Control_temperaruta_Domo(void *parameter) {
+  bool estado_anterior_dia = false;
+  bool estado_anterior_noche = false;
   for (;;) { 
+    bool estado_actual_dia =((Hora >= 5 && Hora <= 18) && (Sensor_domo < 25 && Sensor_domo > 20 ));
+    bool estado_actual_noche =((Hora < 5 || Hora > 18) && (Sensor_domo <= 20 && Sensor_domo >= 15 ));
+              if (estado_actual_dia) {
+                    digitalWrite(motobomba, LOW);
+                    digitalWrite(riego, LOW); 
+                  }else{
+                    digitalWrite(motobomba, HIGH);
+                    digitalWrite(riego, HIGH); 
+                  }
+                   
+               if (estado_actual_noche) {
+                    digitalWrite(motobomba, LOW);
+                    digitalWrite(riego, LOW);  
+                  }else {
+                    digitalWrite(motobomba, HIGH);
+                    digitalWrite(riego, HIGH);
+                  }
 
-          if (Hora >= 5  && Hora <= 18){
-//                    Temperatura en el dia
-//                        Serial.print (Sensor_domo);
-                      if (Sensor_domo < 25  && Sensor_domo > 20  ){
-                        digitalWrite(motobomba,LOW);
-                        digitalWrite(riego,LOW);
-//                        Serial.println (" Se Finaliza el control de temperatura"); 
-                        }else{
-                        digitalWrite(motobomba,HIGH);
-                        digitalWrite(riego,HIGH);
-//                        Serial.println (" Se inicia el control de temperatura");                          
- 
-                        }            
-          }else{
-//                    Temperatura en la noche 
-//                       Serial.print (Sensor_domo);
-                      if (Sensor_domo < 20  && Sensor_domo > 15  ){
-                        digitalWrite(motobomba,LOW);
-                        digitalWrite(riego,LOW);
-//                       Serial.println (" Se Finaliza el control de temperatura");  
-                        }else{
-                         digitalWrite(motobomba,HIGH);
-                        digitalWrite(riego,HIGH);
-//                        Serial.println (" Se inicia el control de temperatura");                         
+          if (estado_anterior_dia != estado_actual_dia) {
+          estado_anterior_dia = estado_actual_dia;
+          COMANDOS_AT(alerta_mensaje);
+          Serial.print("Estado de la control de temperatura domo dia: ");
+          Serial.println(estado_actual_dia ? "dentro de  rango" : "fuera de rango ");
+          }
+          if (estado_anterior_noche != estado_actual_noche) {
+          estado_anterior_noche = estado_actual_noche;
+          COMANDOS_AT(alerta_mensaje);
+          Serial.print("Estado de la control de temperatura domo noche: ");
+          Serial.println(estado_actual_noche ? "dentro de  rango" : "fuera de rango ");
+          }
 
-                        }   
-          }     
+                  
                     delay(1000);
+                    yield();
       }
   vTaskDelay(10);
+}
+
+void menu_print_opciones(String lista[], int opcion1, int opcion2) {
+      lcd.clear();
+      lcd.setCursor(0, 1);
+      lcd.print(lista[opcion1]);
+      lcd.setCursor(0, 2);
+      lcd.print(lista[opcion2]);
+  unsigned long tiempoInicio = millis();
+  while (millis() - tiempoInicio < 5000) {
+
+    yield();
+  }
+}
+
+void menu_print_opciones_uno(String lista[], int opcion1) {
+      lcd.clear();
+      lcd.print(lista[opcion1]);
+  unsigned long tiempoInicio = millis();
+  while (millis() - tiempoInicio < 5000) {
+
+    yield();
+  }
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void COMANDOS_AT(String lista[] ) {
+  unsigned long tiempo_envio_comando_AT = 0;
+  const unsigned long RETARDO_ENVIO_COMANDO_AT = 500;  
+  unsigned long tiempo_envio_comando_ATI = 0;
+  const unsigned long RETARDO_ENVIO_COMANDO_ATI = 500;
+  unsigned long tiempo_envio_comando_CPIN = 0;
+  const unsigned long RETARDO_ENVIO_COMANDO_CPIN = 5000;
+  unsigned long tiempo_envio_comando_CREG = 0;
+  const unsigned long RETARDO_ENVIO_COMANDO_CREG = 500;
+  unsigned long tiempo_envio_comando_CMGF = 0;
+  const unsigned long RETARDO_ENVIO_COMANDO_CMGF = 500;
+  unsigned long tiempo_envio_comando_CMGS = 0;
+  const unsigned long RETARDO_ENVIO_COMANDO_CMGS = 500;
+  unsigned long tiempo_envio_comando_TXT = 0;
+  const unsigned long RETARDO_ENVIO_COMANDO_TXT = 500;
+  unsigned long tiempo_envio_comando_ENVIADO = 0;
+  const unsigned long RETARDO_ENVIO_COMANDO_ENVIADO = 120000;
+  unsigned long tiempo_envio_comando_ERROR = 0;
+  const unsigned long RETARDO_ENVIO_COMANDO_ERROR = 50000;
+  const int HORA_ENCENDIDO = 5;
+  const int HORA_APAGADO = 23;
+
+        if (millis() - tiempo_envio_comando_AT >= RETARDO_ENVIO_COMANDO_AT) {
+          quectelSerial.print("AT\r\n");  //Envia comando AT
+          texto=quectelSerial.readString();
+          Serial.println(texto);
+          tiempo_envio_comando_AT = millis();
+        }
+          if (texto.indexOf("OK")>0) {
+            texto="";
+               if (millis() - tiempo_envio_comando_ATI >= RETARDO_ENVIO_COMANDO_ATI) {
+                quectelSerial.println("ATI\r\n"); //Envia comando AT
+                texto = quectelSerial.readString();
+                Serial.println(texto);
+                tiempo_envio_comando_ATI = millis();
+              }
+                if (texto.indexOf("EC20") > 0) {
+                  texto="";
+                    if (millis() - tiempo_envio_comando_CPIN >= RETARDO_ENVIO_COMANDO_CPIN) {
+                      quectelSerial.println("AT+CPIN?\r\n");  //Envia comando AT+CPIN?
+                      quectelSerial.available();
+                      texto=quectelSerial.readString();
+                      Serial.println(texto);
+                      tiempo_envio_comando_CPIN = millis();
+                    }
+                              if(texto.indexOf("OK")>0){
+                                texto="";
+                                  if (millis() - tiempo_envio_comando_CREG >= RETARDO_ENVIO_COMANDO_CREG) {
+                                      quectelSerial.println("AT+CREG?\r\n");  //Envia comando AT+CREG?
+                                      quectelSerial.available();
+                                      texto=quectelSerial.readString();
+                                      Serial.println(texto);
+                                      tiempo_envio_comando_CREG = millis();
+                                    }
+                                              if(texto.indexOf("0,1")>0){
+                                                texto="";
+                                                  if (millis() - tiempo_envio_comando_CMGF >= RETARDO_ENVIO_COMANDO_CMGF) {    
+                                                      quectelSerial.println("AT+CMGF=1\r\n"); //Envia comando AT+CMGF=1
+                                                      quectelSerial.available();
+                                                      texto=quectelSerial.readString();
+                                                      Serial.println(texto);
+                                                      tiempo_envio_comando_CMGF = millis();
+                                                    }
+                                                              if(texto.indexOf("OK")>0){
+                                                                texto="";
+                                                                    if (millis() - tiempo_envio_comando_CMGS >= RETARDO_ENVIO_COMANDO_CMGS) {     
+                                                                      quectelSerial.println("AT+CMGS=\"3107483273\"");
+                                                                      quectelSerial.available();
+                                                                      texto = quectelSerial.readString();
+                                                                      Serial.println(texto);
+                                                                      tiempo_envio_comando_CMGS = millis();
+                                                                    }
+                                                                               if(texto.indexOf(">")>0){
+                                                                                texto="";
+                                                                                        if (millis() - tiempo_envio_comando_TXT >= RETARDO_ENVIO_COMANDO_TXT) {
+                                                                                          quectelSerial.print((Sensor_tanque_princial >= 18 && Sensor_tanque_princial <= 27) ? lista[3] : lista[2]);
+                                                                                          if (Hora >= 5 && Hora <= 18){
+                                                                                            quectelSerial.print((Sensor_domo > 20 && Sensor_domo < 25)  ? lista[1] : lista[0]);
+                                                                                          }
+                                                                                          if (Hora < 5 || Hora > 18){
+                                                                                          quectelSerial.print(( Sensor_domo > 15 && Sensor_domo < 20) ? lista[1] : lista[0]);  
+                                                                                          }
+                                                                                          if (Hora >= HORA_ENCENDIDO && Hora <= HORA_APAGADO){
+                                                                                            quectelSerial.println(( valor_fotoresistencia < 30) ? lista[4] : lista[5]);
+                                                                                          }else{
+                                                                                            quectelSerial.println(lista[5]);
+                                                                                          }
+                                                                                          quectelSerial.available();
+                                                                                          tiempo_envio_comando_TXT = millis();
+                                                                                        }
+                                                                              }else{
+                                                                        Serial.println("Error comando AT+CMGS"); 
+                                                                      }     
+                                                              }else{
+                                                              Serial.println("Error comando AT+CMGF"); 
+                                                            }
+                                              }else{
+                              Serial.println("Error comando AT+GREG"); 
+                            }
+                                               
+                              }else{
+                              Serial.println("Error comando AT+CPIN"); 
+                            }
+                }else{
+                Serial.println("Error comando ATI"); 
+              }
+          }else{
+            Serial.println("Error comando AT"); 
+          }
+Serial.println("<<<<<<<<<<<<<<<<<<<<<<<<Se fue el mensaje>>>>>>>>>>>>>>>>>>>>>>>>");
 }

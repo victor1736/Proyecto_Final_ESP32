@@ -1,0 +1,12 @@
+# Writing all output to: C:\Users\victo\OneDrive\Escritorio\Proyecto_final\Cultivo_Hidroponico_ESP8266\Proyecto_Final_ESP8266\PCB\pcb_cultivo.log
+set pad_wire_necking on
+bus diagonal
+fanout 5
+route 50
+clean 5
+route 50 16
+clean 5
+filter 5
+recorner diagonal
+status_file
+
